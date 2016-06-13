@@ -1,0 +1,26 @@
+maxframes  = 2000
+
+par wc = pdist(frame[275,:],frame[494,:], box).min()
+par hg  = pdist(frame[275,:],frame[488,:], box).min()
+par bp  = pdist(frame[274,:],frame[491,:], box).min()
+
+state A = (0.25 < wc & wc < 0.35 & 0.38 < hg & bp < 0.35)
+state B = (0.25 < hg & hg < 0.35 & 0.38 < wc & bp < 0.35)
+
+interface I = (!A) & (!B)
+
+stop (A | B)
+
+recross A-0-A = A
+recross B-0-B = B
+recross |-0-A = |-A
+recross A-0-| = A-|
+recross |-0-B = |-B
+recross B-0-| = B-|
+
+recross A-I-A = A
+recross B-I-B = B
+recross |-I-A = |-A
+recross A-I-| = A-|
+recross |-I-B = |-B
+recross B-I-| = B-|

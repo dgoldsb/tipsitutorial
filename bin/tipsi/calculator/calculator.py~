@@ -1,0 +1,332 @@
+
+import tokenize, io, operator, numpy, math, functions
+
+
+_binaryOperators = { 
+    #  Operator    Level Order     Function
+        '==':     (  1,   'l',  operator.eq ),
+        '!=':     (  1,   'l',  operator.ne ),
+        '>=':     (  1,   'l',  operator.ge ),
+        '>':      (  1,   'l',  operator.gt ),
+        '<=':     (  1,   'l',  operator.le ),
+        '<':      (  1,   'l',  operator.lt ),
+        '<<':     (  2,   'l',  operator.ishift ),
+        '>>':     (  2,   'l',  operator.rshift ),
+        '&':      (  2,   'l',  operator.and_ ),
+        '|':      (  2,   'l',  operator.or_ ),
+        '^':      (  2,   'l',  operator.xor ),
+        '**':     (  3,   'r',  operator.pow ),
+        '*':      (  4,   'l',  operator.mul ),
+        '%*%':    (  4,   'l',  functions.mmult ),
+        '/':      (  4,   'l',  operator.truediv ),
+        '//':     (  4,   'l',  operator.floordiv ),
+        '%':      (  4,   'l',  operator.mod ),
+        '+':      (  5,   'l',  operator.add ),
+        '-':      (  5,   'l',  operator.sub ),
+    }
+
+_keywords = {
+    
+}
+
+class CalculatorParseError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return self.msg
+
+
+class Calculator(dict):
+
+    def __init__(self,*args,**kwargs):
+
+        self.log = []
+        self.maxlevel = max([i[0] for i in _binaryOperators.values()])
+
+
+        # Registering modules
+        self.log.append("# Registering modules:")
+        for mod in ["numpy","math"]:
+            self.log.append(mod)        
+            self[mod] = locals()[mod]
+
+
+        # Register functions
+        self.functions = dict()
+        self.log.append("# Registering functions from module functions:")
+        for f in dir(functions):
+            g = getattr(functions,f)
+            if callable(g) and f[0] != "_":
+                self.log.append("# %s"%f)
+                self.functions[f] = g
+
+
+        self.log.append("# Initialization")
+        for v,e in kwargs.items():
+            if callable(e):
+                # Register function
+                self.log.append("Function %s"%v)
+                self.functions[v] = e
+            elif type(e) == str:
+                # Register result from expression
+                for i in e.split(';'):
+                    result = self.do(i)
+                self.log.append("Variable %s = %s"%(v,str(result)))                    
+                self[v] = result
+            else:
+                # Register variable
+                self.log.append("Variable %s = %s"%(v,str(e)))
+                self[v] = e
+
+
+        self(*args)
+
+
+    def __call__(self,*args):
+        v = None
+        for i in args:
+            for j in i.split(";"):
+                v = self.do(j)
+        return v
+ 
+
+    def clear(self):
+        self.log = []
+        dict.clear(self)
+
+
+    def eval_term(self,tokenlist):
+        """Evaluate the first token in the list and act accordingly"""
+
+
+        # 1. Values
+        if (type(tokenlist[0]) in (float,int,complex,tuple)
+            or isinstance(tokenlist[0], numpy.ndarray)):
+            return tokenlist.pop(0)
+
+    
+        # 2. Negated values
+        #    Evaluate the next term and return the result negated.
+        if tokenlist[0] == '-':
+            # Negate following value
+            tokenlist.pop(0)
+            return - self.eval_term(tokenlist)
+
+    
+        # 3. Functions
+        #    Build an argument list, apply the function and return the return value
+        if callable(tokenlist[0]) or tokenlist[0] in self.functions:
+            f = tokenlist.pop(0)
+            if tokenlist[0] != '(':            
+                raise CalculatorParseError("Expected '(' following function %s"%f)
+            tokenlist.pop(0)
+            if tokenlist[0] == ')':
+                tokenlist.pop(0)
+                return f() if callable(f) else self.functions[f]()
+            args = []
+            while tokenlist:
+                args.append(self.eval_expression(tokenlist))
+                if tokenlist[0] == ')':
+                    tokenlist.pop(0)
+                    break
+                if tokenlist[0] != ',':
+                    print tokenlist
+                    raise CalculatorParseError("Expected ')' or ',' in building argument list of %s"%f)
+                tokenlist.pop(0)
+            return f(*args) if callable(f) else self.functions[f](*args)
+
+    
+        # 4. Grouped expressions or collections
+        #    Evaluate grouped expression and return result
+        #    or build collection and return as value.
+        if tokenlist[0] == '(':
+            d,v = tokenlist.pop(0), self.eval_expression(tokenlist)
+
+            if tokenlist[0] == ',':
+                # Oh, building a collection...
+                coll = [v]
+                tokenlist.pop(0)
+
+                while tokenlist:
+                    coll.append(self.eval_expression(tokenlist))
+                    if tokenlist[0] == ')':
+                        tokenlist.pop(0)
+                        break
+                    if tokenlist[0] != ',':
+                        raise CalculatorParseError("Expected ')' or ',' in building argument list of %s"%f)
+                    tokenlist.pop(0)
+                return numpy.array(coll)            
+
+            if tokenlist[0] != ')':
+                raise CalculatorParseError("')' expected")
+
+            tokenlist.pop(0)
+            return v
+
+
+        # 5. Extraction
+        if tokenlist[0] == '[':
+            d,v = tokenlist.pop(0), self.eval_expression(tokenlist)
+    
+            if tokenlist[0] == ',':
+                coll = [v]
+                tokenlist.pop(0)
+                while tokenlist:
+                    coll.append(self.eval_expression(tokenlist))
+                    if tokenlist[0] == ']':
+                        tokenlist.pop(0)
+                        break
+                    if tokenlist[0] != ',':
+                        raise CalculatorParseError("Expected ']' or ',' in building index list of %s"%f)
+                    tokenlist.pop(0)
+                return coll            
+
+            if tokenlist[0] != ']':
+                raise CalculatorParseError("']' expected")
+
+            tokenlist.pop(0)
+            return v
+    
+    
+        # 6. Assignment
+        #    Add result to self-space and return value assigned
+        if len(tokenlist) > 2 and tokenlist[1] == '=':
+            v,d = tokenlist.pop(0), tokenlist.pop(0)            
+            self[v] = self.eval_expression(tokenlist)
+            self.log.append("Variable %s = %s"%(v,self[v]))
+            return self[v]
+
+    
+        # 7. Substitute variable for value
+        if tokenlist[0] in self:        
+            return self[tokenlist.pop(0)]
+
+
+        # 8. Strings. For retrieving attributes (see eval_expression).
+        if tokenlist[0][0].isalpha() or tokenlist[0][0] == "_":
+            return tokenlist.pop(0)
+
+
+        # 9. Slicing. See below for complete handling. Just have to
+        #    make sure to return None of we encounter a ':' first.
+        if tokenlist[0] == ':':
+            return None
+
+
+        # If we have not returned by now, something is wrong.
+        raise CalculatorParseError("Syntax error: %s" % repr(tokenlist[0]))
+
+
+    def eval_expression(self,tokenlist,level=None):
+        """Process an expression"""
+    
+        if level == None:
+            level = self.maxlevel
+
+        if level == 0:
+            return self.eval_term(tokenlist)
+    
+        a = self.eval_expression(tokenlist,level-1)            
+        while tokenlist:
+            
+            # Get property
+            if tokenlist[0] == ".":
+                tokenlist.pop(0)
+                tokenlist[0] = getattr(a,tokenlist[0])
+                a = self.eval_expression(tokenlist)                
+
+            # Slicing
+            elif tokenlist[0] == ":":
+                tokenlist.pop(0)
+                b = None
+                c = None
+                # Only ':', ',', ']', ')' or expression possible after ':'
+                if tokenlist[0] not in (']',':',',',')'):
+                    b = self.eval_term(tokenlist)
+                else:
+                    tokenlist.pop(0)
+                if tokenlist[0] not in (']',',',')'):
+                    c = self.eval_term(tokenlist)
+                a = slice(a,b,c)
+
+            # List extraction
+            elif tokenlist[0] == "[":
+                e = self.eval_term(tokenlist)
+                if type(e) == int:
+                    a = a[e]
+                else:
+                    a = a[tuple(e)]
+
+            # Binary operations
+            elif tokenlist[0] in _binaryOperators:
+                (lv, gr, op) = _binaryOperators[tokenlist[0]]
+                if level != lv:
+                    break
+                tokenlist.pop(0)
+                b = self.eval_expression(tokenlist,level-(gr != 'r'))
+                a = op(a,b)
+
+            # Break on all other cases
+            else:
+                break
+
+        return a
+
+
+    def do(self,expr):
+        """Parse tokens, setting up expression, checking and combining terms"""
+
+        # Ignore comments
+        expr = expr.strip()
+        if expr[0] in "#":
+            self.log.append(expr)
+            return
+
+        T = [i[:2] for i in tokenize.generate_tokens(io.BytesIO(expr.encode('utf-8')).readline)]
+        t = []
+        while T:          
+            typ, st = T.pop(0)
+
+            # Encoding or space (skip)
+            if typ == 56 or typ == 0: 
+                continue
+
+            # Number
+            elif typ == 2: 
+                if 'j' in st or 'J' in st:
+                    t.append(complex(st))
+                elif '.' in st or 'e' in st or 'E' in st:
+                    t.append(float(st))
+                else:
+                    t.append(int(st))
+
+            # Operator
+            elif typ == 51: 
+                if len(T)>2 and T[0][0] == 51 and T[1][0] == 51:
+                    b = st+T[0][1]+T[1][1]
+                    if b in _binaryOperators:
+                        t.append(b)
+                        T.pop(0)
+                        T.pop(0)
+                        continue
+                if len(T)>1 and T[0][0] == 51:
+                    b = st+T[0][1]
+                    if b in _binaryOperators:
+                        t.append(b)
+                        T.pop(0)
+                        continue
+                t.append(st)
+            
+            # Name (function/variable/constant)
+            else:
+                t.append(st)
+        
+        expression = "".join(str(i) for i in t)
+        result = self.eval_expression(t)
+        self.log.append("%s := %s"%(expression,result))
+
+        return result
+
+    
+    
+                    

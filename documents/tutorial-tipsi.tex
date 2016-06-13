@@ -1,0 +1,280 @@
+\documentclass[]{article}
+
+\usepackage{color}
+\usepackage{listings}
+\usepackage[tmargin=1in,bmargin=1in,lmargin=1.25in,rmargin=1.25in]{geometry}
+\usepackage{titlesec}
+\titleformat*{\section}{\Large\bfseries\sffamily}
+\titleformat*{\subsection}{\large\bfseries\sffamily}
+
+\setlength\parindent{15pt}
+\lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
+
+% TODO:change for non-Carbon
+
+\begin{document}
+
+\section*{Transition Path Sampling}
+
+\subsection*{Introduction}
+
+% https://www.dropbox.com/s/5erwtsptqm2im82/log-DNAbaserolling.pdf?dl=0
+In this tutorial the useage of the \textsc{TIPSI} package is demonstrated. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, where transitions between the two states are extremely rare. MORE INFORMATION TPS and GROMACS.
+
+We use the THING \textsc{TIPSI}. Hoogsteen and Watson-Crick config.
+
+This tutorial is written for \textsc{TIPSI} version 0.1, which relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. Git is required to pull the repository with the demonstration files. For visualizing structures, we recommend the VMD package. This tutorial is written assuming you work on a Linux systemWe assume some knowledge in working with Linux (\texttt{cd} and \texttt{ls} command), as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial. This version of the tutorial assumes you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
+
+Stukje over hoe het opgezet is naast het protocol, welk field en alles.
+
+\subsection*{Preparatory Analysis}
+
+To run an analysis \textsc{TIPSI}, as we need to supply an intial trajectory to \textsc{TIPSI} in which the transition takes place at least once. We also need to define the stable states between which the transition takes place in a quantitative way. To get an initial trajectory, we do a regular analysis of the molecular system first.
+
+First, we log into the Carbon cluster. Make sure you are connected to the UvA network or VPN, and enter
+%
+\begin{lstlisting}
+ssh user@carbon.science.uva.nl
+\end{lstlisting}
+%
+When logged into the account, pull the tutorial repository to your system, which can be done by
+%
+\begin{lstlisting}
+git clone https://dgoldsb@bitbucket.org/dgoldsb/tipsi-tutorial.git
+\end{lstlisting}
+%
+which will copy the tutorial directory as a new directory in your current folder. Exploring the folder shows the following subfolders:
+%
+\begin{lstlisting}
+%*\textcolor{blue}{bin} \textcolor{blue}{documents} \textcolor{blue}{input} \textcolor{blue}{output} README.md
+\end{lstlisting}
+%
+The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this tutorial are included in \texttt{\textcolor{blue}{input}}, and output will be written into \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
+
+We enter the directory \texttt{\textcolor{blue}{input}} and explore, which shows the following 8 files:
+%
+\begin{lstlisting}
+dipeptala.pdb emw.mdp highT.mdp posre.mdp 
+submit_highT submit_md em.mdp md.mdp
+\end{lstlisting}
+%
+The \texttt{.gro} file contains the structure of the molecule we simulate, in our case dipeptide analine. To view this structure, copy the file to your own PC using a secure copy command, and view the structure in VMD. A nice piece of software that can help in copying files is FileZilla, which provides a GUI for secure copy.
+
+Already added solvent, did an energy minimaztion and contrained run. Now that we have relaxed the solvent we can run the MD simulation. Typically when preparing for \textsc{TIPSI} we run at two temperatures, room temperature (298K) and a higher temperature (400K). Here we do room only, otherwise denatures completely. The simulation at room temperature shows the stable state at the temperature we are interested in. At the higher temperature, the system will transition more easily to the second stable state. This simulation will provide the initial transition trajectory, and also helps us define the two stable states. We run these by entering:
+%
+\begin{lstlisting}
+grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
+qsub submit\_md
+\end{lstlisting}
+%
+The output will be put in the \texttt{\textcolor{blue}{output}} directory.
+
+\subsection*{Running TIPSI}
+
+To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of ome collective variable. In this example, we use the radius of gyration and the dihedral angle over atoms (5, 7, 9, 15).
+
+First, to analyze our initial run, go to the output folder of the high temperature run. Now, run
+%
+\begin{lstlisting}
+g_gyrate -f highT.xtc -s highT.tpr -o gyr_highT.xvg
+\end{lstlisting}
+%
+to generate a dataset containing the radius of gyration for each frame. Then, define all dihedral angles by running
+%
+\begin{lstlisting}
+mk_angndx -s highT.tpr -n angle.ndx -type dihedral
+\end{lstlisting}
+%
+followed by
+%
+\begin{lstlisting}
+g_angle -f highT.xtc -od angles.ndx -ov dihed_highT.xvg 
+-type dihedral
+\end{lstlisting}
+%
+with option 8 (5, 7, 9, 15) to generate a dataset of the dihedral angles. We can visualize how often each combination of these two variables is visited by running
+%
+\begin{lstlisting}
+python ../../bin/generate2Dbins.py gyr_highT.xvg 1 dihed_highT.xvg 
+1 0.2 0.3 -180 -40 100 100 Gyration Dihedral GyrDihed
+\end{lstlisting}
+%
+This script will generate a set of plots in \texttt{.pdf} format. Transfer the plots to your computer and view them. You will see that there are two combinations of a radius of gyration and dihedral angle that are visited a lot by the simulation. If we repeat this with the lowT results, we see that there are few transitions between the states. As such, they can be considered semi-stable, and are our A and B state for \textsc{TIPSI}. Note down the ranges for both variables at which the molecule is in a semi-stable state.
+
+Go to the \textcolor{blue}{\texttt{./bin}} directory, and look at the \texttt{tps.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state in accordance with the range that you noted down. There is little documentation so far on how to include other variables in the parameter file, so some alternative options are included in an appendix. Make sure to fill in your own directory in the parameter file for the location of the \texttt{.gro} file, as we enter the full path here, not the relative path.
+
+We included a group of atoms in out parameter file, namely \texttt{protein}. We must define this custom group in an \texttt{.ndx} file to pass this group to TIPSI. Go to the input directory, and run
+%
+\begin{lstlisting}
+make_ndx -f lowT.tpr
+\end{lstlisting}
+%
+If you open this file with \texttt{more}, you will see that groups are defined in blocks, and that the name of the block is specified by a header in square brackets. The produced file allows you to use any of the \textsc{gromacs} standard groups. Custom groups can be made manually, and are referred to by their header. The index file of choice is included in the \textcolor{green}{\texttt{run\_ tipsi}} file. We edit this file slightly to contain just the groups that we are interested in: the protein group, and the group for the dihedral angle. Open \texttt{index.ndx}, and delete the blocks in index.ndx that are not the protein group, and rename the file \texttt{index-pr-dh.ndx}. Then, add
+%
+\begin{lstlisting}
+[ Dihedral ]
+   5    7    9   15
+\end{lstlisting}
+%
+and save the file in the input directory.
+
+Finally, we need to copy our initial trajectory to our input directory. Change your directory to your high temperature MD output, and exectute 
+%
+\begin{lstlisting}
+cp highT.trr ../../input-dipeptala/highT.trr
+\end{lstlisting}
+%
+
+Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_ tipsi}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
+%
+\begin{lstlisting}
+qsub submit_tipsi
+\end{lstlisting}
+%
+
+\subsection*{Analyzing Results from TIPSI}
+
+% REALLY GO INTO DETAIL HERE
+% Meer detail dan vorige tutorial die ik volg
+
+\newpage
+
+\appendix
+\section*{Linux Cheatsheet}
+\setlength\parindent{0pt}
+
+\begin{itemize}
+\item \textbf{Display current directory}: \texttt{pwd}
+
+\item \textbf{View contents of the current directory}: \texttt{ls}
+
+\item \textbf{Change the directory}: \texttt{cd ./your/directory/here}
+
+\textbf{Note}: the currect directory is referred to as \texttt{./}, the directory in which your current directory resides is \texttt{../}
+
+\item \textbf{Copy a directory/file}: \texttt{cp ./target ./new/location/}
+
+\textbf{Note}: the option \texttt{-r} (recursive) is required for directories, this implies all the contents should be copied
+
+\item \textbf{Delete a directory/file}: \texttt{rm ./target}
+
+\textbf{Note}: again the recursive option is required for directories, and mind that deleted directories cannot be recovered.
+
+\item \textbf{Read a file}: \texttt{more ./target} or \texttt{head ./target} or \texttt{tail ./target}
+
+\item \textbf{Make a file executable}: \texttt{chmod +x ./target}
+\end{itemize}
+
+\newpage
+\section*{GROMACS Cheatsheet}
+
+% TODO: remove or add what I have in my readme
+\begin{itemize}
+\item \textbf{Check the temperature of a simulation}: \texttt{gmxdump -s target.md $|$ grep ref\_t}
+\end{itemize}
+
+\newpage
+\section*{TIPSI Cheatsheet}
+
+\subsection*{Running parameters}
+
+In general, we run \textsc{tipsi} using the \texttt{run tipsi}-script included in the \textcolor{blue}{\texttt{./bin/tipsi/calculator}}-directory. 
+Examining this script reveals that \textsc{tipsi} takes the following input parameters in the case of this tutorial:
+
+\begin{lslisting}
+./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps.par -ndx index.ndx -maxc 10 -np 16 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "\$MDRUN"
+\end{lslisting}
+
+The parameter \texttt{-v} enables verbose output, which is written to the \texttt{O}-file in the output directory. 
+In general this is helpful, as it will give some indication of where things go wrong when a run fails. 
+The MD-settings are then read from a tpr-file, entered under \texttt{-tpr}. 
+The initial trajectory is loaded in with \texttt{-trr}. 
+The parameter file is loaded in with \texttt{-par}, and the groups that are used in the parameter file with \texttt{-ndx}. 
+The number of processors for MPI is set with \texttt{-np}. 
+Finally, the correct \textsc{gromacs} executables are linked to with \texttt{-gmxrx} and \texttt{-mdrun}.
+Additional parameters can be found by running \textsc{tipsi} with the \texttt{-h} command.
+
+\subsection*{Making a .par file}
+
+A paremeter file contains several pieces of information. First, the maximum frames of a trajectory is defined. 
+Second, the groups have to be defined, as well as the parameters. 
+For the parameter definitions, a number of functions in \textsc{tipsi} can be used. 
+Many have a corresponding function native to \texttt{gromacs} that provides the same output. 
+A list of all functions, and their parameters, will be provided in this appendix. 
+Third, we have to define the states of the system using these parameters.
+The states are a boolean expression, written in Python-syntax. An example is:
+
+\begin{lslisting}
+state A = (0.25 < wc & wc < 0.35 & 0.38 < hg)
+state B = (0.25 < hg & hg < 0.35 & 0.38 < wc)
+
+interface I = (!A) & (!B)
+\end{lslisting}
+
+It is noteworthy that \textsc{tipsi} seems to not handle excessive brackets well, so try to keep your statement within a single pair of brackets, and use the priority order of different operators to your advantage.
+The intermediate state is always defined as not A and not B.
+Finally, the parameter file is finished with a set of recrossing rules. These are generally kept the same.
+
+\subsection*{Defining groups}
+
+In general, the way to specify a group of atoms in \textsc{tipsi} is through a numpy array. 
+For example, we can find the radius of gyration of atom 5, 7, 13 and 18 through:
+
+\begin{lstlisting}
+init group = numpy.array((5, 7, 13, 18))
+par rg  = rgyration(frame[acc,:])
+\end{lstlisting}
+
+Groups can be specified in an index file, which has to be included as a parameter. 
+A standard index file, as generated by \texttt{gromacs}, contains a number of standard groups. 
+These include the entire protein, the carbon backbone, and the sidechains. For example, we can find the radius of gyration over the entire protein:
+
+\begin{lstlisting}
+par rg  = rgyration(frame$Protein)
+\end{lstlisting}
+
+\textsc{Tipsi} is often flexible when it comes to defining pairs. For example, the calculater function that calculates the periodic distance between two atoms can take both two seperate atoms as an input, as well as on numpy array of two atoms. This is demonstrated below:
+
+\begin{lstlisting}
+par dist1 = pdist(frame[5,:],frame[7,:])
+
+init pair = numpy.array((5, 7))
+par dist2 = pdist(frame[pair,:]) 
+\end{lstlisting}
+
+\subsection*{Calculator options}
+
+\textbf{IMPORTANT NOTE}: \textsc{tipsi} starts its index with 0, whereas \textsc{gromacs} starts with 1. To avoid off-by-one errors, make sure you subtract 1 off every atom number. The index files read into \textsc{tipsi} are 1-indexed, however.
+
+Below, we show a list of the available functions to define parameters in the .par file. An atom or group of atoms is always defined within a frame. 
+Each frame is a $n \times 3$ array, containing the x/y/z-coordinates of all $n$ atoms in the trajectory. 
+Some functions can take weights as an input argument. For example, the atom mass can be use as a weight in many cases.
+The weights can be extracted from, for example, the \texttt{.itp}-files in the example.
+The weights can be loaded into \texttt{tipsi} by including them as a numpy-array in the parameter file. 
+If a periodic version exists, \texttt{box} as an argument. Non-periodic conditions are assumened if \texttt{box} is left as \texttt{none}.
+Alternatively, the list can be included in the index-file, as groups in the index files are simply loaded as arrays.
+A final important note that for distances, it is preferable to input two of the same atoms at once, so \texttt{frame[numpy.array((1,1)),:]}, and adding \texttt{.min()} after the command.
+This is because some distance functions need an array input for the atom numbers, regardless of whether it is only one atom.
+For more information, explore \texttt{functions.py} in the \textcolor{blue}{\texttt{./bin/tipsi/calculator}} folder.
+
+\begin{itemize}
+\item 	\texttt{com(coord, box, weights)}\\
+		\textbf{Center of Mass}: mass of a set of atom numbers \texttt{coord} (numpy array or index group).
+\item 	\texttt{dist(a, b, box, what)}\\
+		\textbf{Distance}: the distance between atom numbers \texttt{a} and \texttt{b}. The mode \texttt{what} can be set to Euclidean or Manhattan.
+\item 	\texttt{angle(a, b, c}\\
+		\textbf{Angle}: the angle between atom numbers \texttt{a}, \texttt{b} and \texttt{c}.
+\item 	\texttt{dihrad(a, b, c, d)}\\
+		\textbf{Dihedral (radians)}: the dihedral between atom numbers \texttt{a}, \texttt{b}, \texttt{c} and \texttt{d} in radians.
+\item 	\texttt{dihdeg(a, b, c, d)}\\
+		\textbf{Dihedral (degrees)}: the dihedral between atom numbers \texttt{a}, \texttt{b}, \texttt{c} and \texttt{d} in degrees.
+\item 	\texttt{rgyr(x)}\\
+		\textbf{Radius of gyration}: the radius of gyration over a set of atom numbers \texttt{x}.
+		It should be noted that, unlike in \textsc{gromacs}, this is not standard weighted with the atom mass.
+\item 	\texttt{rmsd(x, y)}\\
+		\textbf{Root-mean-square-deviation}: the RMSD between the groups of atom numbers \texttt{x} and \texttt{y}.
+\item 	\texttt{hbonds(D, H, A, mode, box)}\\
+		\textbf{Hydrogen bonds}: returns the number of hydrogen bonds between a group of donors (an array of atom numbers \texttt{D}), hydrogens (an array of atom numbers \\texttt{H}) and acceptors (an array of atom numbers \texttt{A}). The \texttt{mode} can be set to \texttt{dha}, in which case only triplets are considered in the order given. If not, then all possible combinations of donors, hydrogens and acceptors are considered. 
+\end{itemize}
+
+\end{document}

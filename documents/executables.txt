@@ -1,0 +1,9 @@
+-rwxr-xr-x   1 vreede  staff    25240 Apr 15  2015 tipsi.py
+-rwxr-xr-x   1 vreede  staff     7186 Apr 15  2015 do.sh
+-rwxr-xr-x   1 vreede  staff     3210 Apr 15  2015 sparser.py
+-rwxr-xr-x   1 vreede  staff     1409 Apr 15  2015 tpred.py
+-rwxr-xr-x   1 vreede  staff     1022 Apr 15  2015 parse.py
+-rwxr-xr-x   1 vreede  staff     2044 Apr 15  2015 modyca.py
+-rwxr-xr-x   1 vreede  staff     9384 Apr 15  2015 tps.sh
+-rwxr-xr-x   1 vreede  staff    96770 Apr 15  2015 gromit.sh
+

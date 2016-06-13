@@ -1,0 +1,25 @@
+maxframes  = 2000
+
+par dh1  = dihdeg(frame$Dihedral1)
+par dh2  = dihdeg(frame$Dihedral2)
+
+state A = (-150 < dh1 & dh1 < -50 & 120 < dh2 & dh2 < 180)
+state B = (-100 < dh1 & dh1 < -50 & -50 < dh2 & dh2 < 20)
+
+interface I = (!A) & (!B)
+
+stop (A | B)
+
+recross A-0-A = A
+recross B-0-B = B
+recross |-0-A = |-A
+recross A-0-| = A-|
+recross |-0-B = |-B
+recross B-0-| = B-|
+
+recross A-I-A = A
+recross B-I-B = B
+recross |-I-A = |-A
+recross A-I-| = A-|
+recross |-I-B = |-B
+recross B-I-| = B-|
