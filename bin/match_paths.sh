@@ -19,7 +19,7 @@ for file in */*/PARENT ; do
 		in2=${array2[0]}
 		
 		# Check which one is forward, thus last!
-		if [ -f "$DIR/FORWARD" ]
+		if grep -q FW "$in1"; 
 		then
 			outname=./totalpath_$(basename $(dirname $value))_$(basename $(dirname $DIR)).xtc
 	                echo $outname   
