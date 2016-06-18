@@ -27,6 +27,15 @@ Order parameters are:
 * wc (waterstofbrug die gevormd wordt bij WC paring): 276, 495
 * hg (waterstofbrug die gevormd wordt bij Hoogsteen paring): 276, 489
 
+To set up OPS and the piggybacker:
+    * https://github.com/openpathsampling/openpathsampling/blob/master/devtools/conda-recipe/meta.yaml
+    * http://openpathsampling.org/latest/getting_started.html
+    * http://mdtraj.org/1.7.2/installation.html
+    * install mmtools
+    * nosetest in git
+    * pip install -e .
+    * set up ssh github and bitbucket
+
 ##Cheatsheet
 ---------
 **For the distance ```.xvg```:**
