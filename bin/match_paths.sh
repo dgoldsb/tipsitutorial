@@ -4,12 +4,12 @@ add_to_traj(){
         if [ -f "./$outname" ]
         then
                 echo "Add two to each other" >> mergelog.txt 2>&1
-                trjconv -dump $timestep -f $trajectory_xtc -o temp.xtc >> mergelog.txt 2>&1
-		trjcat -f $outname temp.xtc -o $outname >> mergelog.txt 2>&1
-		rm temp.xtc
+                trjconv -dump $timestep -f $trajectory_trr -o temp.trr >> mergelog.txt 2>&1
+		trjcat -f $outname temp.trr -o $outname >> mergelog.txt 2>&1
+		rm temp.trr
         else
                 echo "Create the first frame" >> mergelog.txt 2>&1
-		trjconv -dump $timestep -f $trajectory_xtc -o $outname >> mergelog.txt 2>&1
+		trjconv -dump $timestep -f $trajectory_trr -o $outname >> mergelog.txt 2>&1
         fi
 }
 
@@ -49,9 +49,19 @@ for file in */*/PARENT ; do
 		echo "$file is accepted, proceeding..." >> mergelog.txt 2>&1
 		try=$(basename $DIR)
 		run=$(basename $(dirname $DIR))
-		outname=./totalpath_run$run.xtc                
+		outname=./totalpath_run$run.trr                
 		process_accept
         else
                 echo "$file is rejected, skipping to next..." >> mergelog.txt 2>&1
         fi
+done
+
+for file in ./
+	if [ -f "./*.trr" ]
+	ext='.trr'
+	then
+		trjconv -f $file -s ../*.tpr -pbc mol -center -ur compact -o ${file%$ext}.xtc
+		1
+		1
+	fi
 done
