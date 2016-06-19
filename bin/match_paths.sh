@@ -4,10 +4,12 @@ add_to_traj(){
         if [ -f "./$outname" ]
         then
                 echo "Add two to each other" >> mergelog.txt 2>&1
-		echo trjcat -f $outname $trajectory_xtc -b $timestep -e $timestep -o $outname >> mergelog.txt 2>&1
+                trjconv -dump $timestep -s $trajectory_tpr -f $trajectory_xtc -o temp.xtc >> mergelog.txt 2>&1
+		trjcat -f $outname temp.xtc -o $outname >> mergelog.txt 2>&1
+		rm temp.xtc
         else
-		echo "Create the first frame" >> mergelog.txt 2>&1
-                echo trjconv -f $trajectory_xtc -b $timestep -e $timestep -o $outname >> mergelog.txt 2>&1
+                echo "Create the first frame" >> mergelog.txt 2>&1
+		trjconv -dump $timestep -s $trajectory_tpr -f $trajectory_xtc -o $outname >> mergelog.txt 2>&1
         fi
 }
 
