@@ -11,18 +11,41 @@ dump(){
     # We want to find the start and end of each trajectory, and if it is backward
     # We read this from a dat-file
     regexdump='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+\S+\s+'
-    if [ -f "$dumpsource/$run-$try-FW.dat" ]
+    if [ -f "$dumpsource/$rundsrc-$trydsrc-FW.dat" ] || [ -f "$dumpsource/0-0.dat" ]
     then
-        file="$DIR/$run-$try-FW.dat"
-        ARRAY=()
+        if [ -f "$dumpsource/0-0.dat" ]
+	then    
+            file="$dumpsource/0-0.dat"
+        else
+	    file="$dumpsource/$rundsrc-$trydsrc-FW.dat"
+        fi
+	ARRAY=()
         while IFS= read line
             do
             # we apply the regex to the line
             [[ $line =~ $regex ]]
-            ARRAY+=${BASH_REMATCH[1]}
+            ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
-        min=$("${ARRAY[*]}" | sort -nr | tail -n1)
-        max=$("${ARRAY[*]}" | sort -nr | head -n1)
+	max=${ARRAY[0]}
+	min=${ARRAY[0]}
+
+	# Loop through all elements in the array
+	for i in "${ARRAY[@]}"
+	do
+	    testres=$($i '>' $max | bc -l)
+	    # Update max if applicable
+	    if [[ $testres == 1 ]]; then
+		max="$i"
+	    fi
+	    
+            testres=$($i '<' $min | bc -l)
+	    # Update min if applicable
+	    if [[ $testres == 1 ]]; then
+	        min="$i"
+            fi
+	done
+	
+	echo Max is $max
         dt=$(expr $ARRAY[1] - $ARRAY[0])
         
         # Now we can overwrite the times...
@@ -33,16 +56,34 @@ dump(){
         trjconv -dump $frameno -f $./temp2.trr -o temp.trr >> mergelog.txt 2>&1
         rm ./temp2.trr >> mergelog.txt 2>&1
     else
-        file="$DIR/$run-$try-BW.dat"
+        file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
         while IFS= read line
             do
             # we apply the regex to the line
             [[ $line =~ $regex ]]
-            ARRAY+=${BASH_REMATCH[1]}
+            ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
-        min=$("${ARRAY[*]}" | sort -nr | tail -n1)
-        max=$("${ARRAY[*]}" | sort -nr | head -n1)
+        max=${ARRAY[0]}
+        min=${ARRAY[0]}
+
+        # Loop through all elements in the array
+        for i in "${ARRAY[@]}"
+        do
+            testres=$($i '>' $max | bc -l)
+            # Update max if applicable
+            if [[ $testres == 1 ]]; then
+                max="$i"
+            fi
+
+            testres=$($i '<' $min | bc -l)
+            # Update min if applicable
+            if [[ $testres == 1 ]]; then
+                min="$i"
+            fi
+        done
+
+	echo Minimum is $min
         dt=$(expr $ARRAY[1] - $ARRAY[0])
         
         # Now we can overwrite the times...
