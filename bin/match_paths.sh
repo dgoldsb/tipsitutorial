@@ -32,15 +32,13 @@ dump(){
 	# Loop through all elements in the array
 	for i in "${ARRAY[@]}"
 	do
-	    testres=$($i '>' $max | bc -l)
 	    # Update max if applicable
-	    if [[ $testres == 1 ]]; then
+	    if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
 		max="$i"
 	    fi
 	    
-            testres=$($i '<' $min | bc -l)
 	    # Update min if applicable
-	    if [[ $testres == 1 ]]; then
+	    if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
 	        min="$i"
             fi
 	done
@@ -69,19 +67,17 @@ dump(){
 
         # Loop through all elements in the array
         for i in "${ARRAY[@]}"
-        do
-            testres=$($i '>' $max | bc -l)
-            # Update max if applicable
-            if [[ $testres == 1 ]]; then
-                max="$i"
+	do
+	    # Update max if applicable
+	    if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
+		max="$i"
+	    fi
+	    
+	    # Update min if applicable
+	    if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
+	        min="$i"
             fi
-
-            testres=$($i '<' $min | bc -l)
-            # Update min if applicable
-            if [[ $testres == 1 ]]; then
-                min="$i"
-            fi
-        done
+	done
 
 	echo Minimum is $min
         dt=$(expr $ARRAY[1] - $ARRAY[0])
