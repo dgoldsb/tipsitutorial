@@ -43,15 +43,16 @@ dump(){
             fi
 	done
 	
-	echo Max is $max
-        dt=$(expr $ARRAY[1] - $ARRAY[0])
+	echo Max is $max >> mergelog.txt 2>&1
+        dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
         
         # Now we can overwrite the times...
+	echo dt is $dt >> mergelog.txt 2>&1
         trjconv -f $trajectory_trr -t0 0 -dt 1 -o ./temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
         # Time runs from min to max, so we want frame timestep-min/dt
-        frameno=$(expr ( $timestep - $min ) / $dt)
-        trjconv -dump $frameno -f $./temp2.trr -o temp.trr >> mergelog.txt 2>&1
+        frameno=$(echo $timestep / $dt - $min / $dt | bc -l)
+        trjconv -dump $frameno -f ./temp2.trr -o temp.trr >> mergelog.txt 2>&1
         rm ./temp2.trr >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
@@ -79,14 +80,15 @@ dump(){
             fi
 	done
 
-	echo Minimum is $min
-        dt=$(expr $ARRAY[1] - $ARRAY[0])
+	echo Minimum is $min >> mergelog.txt 2>&1
+        dt=$(echo ${ARRAY[0]} '-' ${ARRAY[1]} | bc -l)
         
         # Now we can overwrite the times...
+	echo dt is $dt >> mergelog.txt 2>&1
         trjconv -f $trajectory_trr -t0 0 -dt 1 -o ./temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
         # Time runs from max to min, so we want frame timestep-min/dt
-        frameno=$(expr ( $max - $timestep ) / $dt)
+        frameno=$(echo $max / $dt - $timestep / $dt | bc -l)
         trjconv -dump $frameno -f ./temp2.trr -o temp.trr >> mergelog.txt 2>&1
         rm ./temp2.trr >> mergelog.txt 2>&1
     fi
