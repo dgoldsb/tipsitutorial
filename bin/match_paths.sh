@@ -136,7 +136,8 @@ process_accept(){
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
 }
 
-rm mergelog.txt *temp* totalpath_run*
+rm mergelog.txt *temp* totalpath_run* trjconvopts.txt
+echo -e "1\n0" > trjconvopts.txt
 echo "Make sure there are no files called totalpath_runx.trr!"
 # we first find any folder that is produced by TIPSI
 for file in */*/PARENT ; do

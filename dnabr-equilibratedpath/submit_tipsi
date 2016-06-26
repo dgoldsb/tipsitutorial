@@ -117,6 +117,10 @@ prologue
 runprogram
 epilogue
 
+# added by Dylan Goldsborough to compile the path, make sure this path is correct
+cd ${RESULTS_DIR}/DATA
+bash ../../../bin/match_paths.sh
+
 MY_DATE=`date`
 echo "Job finished at $MY_DATE"
 
