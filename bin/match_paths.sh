@@ -52,8 +52,9 @@ dump(){
         # And dump the frame we want
         # Time runs from min to max, so we want frame timestep-min/dt
         frameno=$(echo $timestep - $min | bc -l)
-        trjconv -dump $frameno -f ./temp2.trr -o temp.trr >> mergelog.txt 2>&1
-        rm ./temp2.trr >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f ./temp2.trr -o temp3.trr >> mergelog.txt 2>&1
+	trjconv -f temp3.trr -t0 $timestep -o temp.trr >> mergelog.txt 2>&1
+        rm ./temp2.trr temp3.trr  >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
@@ -89,8 +90,9 @@ dump(){
         # And dump the frame we want
         # Time runs from max to min, so we want frame timestep-min/dt
         frameno=$(echo $max - $timestep | bc -l)
-        trjconv -dump $frameno -f ./temp2.trr -o temp.trr >> mergelog.txt 2>&1
-        rm ./temp2.trr >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f ./temp2.trr -t0 $timestep -o temp3.trr >> mergelog.txt 2>&1
+	trjconv -f temp3.trr -t0 $timestep -o temp.trr >> mergelog.txt 2>&1
+        rm ./temp2.trr temp3.trr  >> mergelog.txt 2>&1
     fi
 }
 
