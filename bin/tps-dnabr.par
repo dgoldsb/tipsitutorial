@@ -1,4 +1,6 @@
 maxframes  = 2000
+nstxout = 2000
+nstvout = 2000
 
 par wc = pdist(frame[275,:],frame[494,:], box).min()
 par hg  = pdist(frame[275,:],frame[488,:], box).min()
