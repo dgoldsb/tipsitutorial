@@ -10,12 +10,9 @@ dump(){
     # We dump from $trajectory_trr
     # We shift by $shift
 
-    dumpsource=$(dirname $trajectory_trr)
-    trydsrc=$(basename $dumpsource)
-    rundsrc=$(basename $(dirname $dumpsource))
     newtimestamp=$(echo $timestamp + $shift | bc -l)
     echo Dumping frame at timestamp $timestamp from $trajectory_trr with timestamp $newtimestamp
-
+    echo TIMESTAMP: $timestamp FROM: $trajectory_trr NEW TIMESTAMP: $newtimestamp >> mergelog.txt 2>&1
     # We want to find the start and end of each trajectory, and if it is backward
     # We read this from a dat-file
     regexdump='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+\S+\s+'
@@ -60,10 +57,9 @@ dump(){
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
 	# And dump the frame we want
-        echo $frameno
-	trjconv -dump $frameno -f temp2.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
-        gmxcheck -f temp.trr
-	rm temp2.trr  >> mergelog.txt 2>&1
+	trjconv -dump $frameno -f temp2.trr -o temp3.trr >> mergelog.txt 2>&1
+        trjconv -f temp3.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
+	rm temp2.trr temp3.trr  >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
@@ -99,8 +95,9 @@ dump(){
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
-        trjconv -dump $frameno -f temp2.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
-        rm temp2.trr  >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f temp2.trr -o temp3.trr >> mergelog.txt 2>&1
+        trjconv -f temp3.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
+        rm temp2.trr temp3.trr  >> mergelog.txt 2>&1
     fi
 }
 
@@ -119,7 +116,6 @@ add_to_traj(){
 }
 
 process_accept(){
-    echo "Shooting_Point New_Shooting_Point Shooting_Frame" >> shootingpoint-run$run.txt 2>&1
     regex='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
 
     echo "Setting the time at 0, shooting point is computed and stored now."
@@ -183,7 +179,7 @@ process_accept(){
         ARRAY+=(${BASH_REMATCH[1]})
     done <"$file"
     minrun=${ARRAY[0]}
-
+    maxrun=${ARRAY[0]}
     # Loop through all elements in the array
     for i in "${ARRAY[@]}"
     do
@@ -191,17 +187,22 @@ process_accept(){
         if [[ $(echo $i '<' $minrun | bc -l) == 1 ]]; then
             minrun="$i"
         fi
+
+	if [[ $(echo $maxrun '<' $i | bc -l) == 1 ]]; then
+	    maxrun="$i"
+	fi
     done
     newshootingpoint=$(echo $originalshootingpoint - $minrun | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
-    echo "$shootingpoint $newshootingpoint $shootingframe" >> shootingpoint-run$run.txt 2>&1
     shift=$(echo - $minrun)
     echo "The shift is $shift"
     # now we assemble the trajectory, as written in the .dat file
     # regex to find the time of the frame and the corresponding tpr/xtc file
 
+    counter=0
+    composition=""
     file="$DIR/$run-$try.dat"
     while IFS= read line
     do
@@ -213,23 +214,35 @@ process_accept(){
         ext='.trr'
         trajectory_xtc=${trajectory_trr%$ext}.xtc
         re='-*[0-9]+.[0-9]+'
-        if [[ $timestamp =~ $re ]] ; then
-            add_to_traj
+        
+        dumpsource=$(dirname $trajectory_trr)
+        trydsrc=$(basename $dumpsource)
+        rundsrc=$(basename $(dirname $dumpsource))
+        composition=$composition$rundsrc
+
+	if [[ $timestamp =~ $re ]] ; then
+            ((counter++))    
+	    add_to_traj
         fi
     done <"$file"
 
-    echo " done, written as ./$outname!"
+    echo "Done, written as ./$outname!"
     
-    gmxcheck -f $outname
+    echo Should have $counter frames, you can check in the mergelog...
+    gmxcheck -f $outname >> mergelog.txt 2>&1
     ext='.trr'    
     # Shifting the starting time to t0 for good measure
     trjconv -f ./$outname -t0 0 -o ./$outname >> mergelog.txt 2>&1
     rm \#*.1\# >> mergelog.txt 2>&1
     echo "Making an .xtc of the .trr..."
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
+
+    echo "$run,$shootingpoint,$newshootingpoint,$shootingframe,$minrun,$maxrun,$composition" >> meta_info.csv 2>&1
+
 }
 
 rm mergelog.txt totalpath_run*
+echo "Run,Shooting point,Shifted shooting point,Shooting frame,Minimum of trajectory,Maximum of trajectory,Composition" >> meta_info.csv 2>&1
 echo -e "1\n0" > trjconvopts.txt
 echo "Make sure there are no files called totalpath_runx.trr!"
 echo "Also note that all paths start at t=0, to avoid negative frame numbers!"
