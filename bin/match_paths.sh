@@ -5,9 +5,15 @@
 # Trjconv setting can be edited by changing what is written to trjconvopts.txt, standard is all atoms, centered for the protein
 
 dump(){
+    # We want to dump frame with timestamp $timestep
+    # The directory of the current path is $DIR
+    # We dump from $trajectory_trr
+    # We shift by $shift
+
     dumpsource=$(dirname $trajectory_trr)
     trydsrc=$(basename $dumpsource)
     rundsrc=$(basename $(dirname $dumpsource))
+    newtimestep=$(echo $timestep + $shift | bc -l)
     
     # We want to find the start and end of each trajectory, and if it is backward
     # We read this from a dat-file
@@ -44,19 +50,16 @@ dump(){
             fi
 	done
 	
-	echo Max is $max >> mergelog.txt 2>&1
-	echo ${ARRAY[1]} '-' ${ARRAY[0]}
+	echo Maximum is $max >> mergelog.txt 2>&1
+	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
+	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
-	echo dt is $dt >> mergelog.txt 2>&1
-        trjconv -f $trajectory_trr -t0 0 -timestep $dt -o ./temp2.trr >> mergelog.txt 2>&1
+        trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
-        # Time runs from min to max, so we want frame timestep-min/dt
-        echo $timestep - $min
-	frameno=$(echo $timestep - $min | bc -l)
-        trjconv -dump $frameno -f ./temp2.trr -o temp.trr >> mergelog.txt 2>&1
-        rm ./temp2.trr  >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
+        rm temp2.trr  >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
@@ -83,18 +86,17 @@ dump(){
             fi
 	done
 
+	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[0]} '-' ${ARRAY[1]} | bc -l)
+	frameno=$(echo $max - $timestep | bc -l)
+	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
-	echo dt is $dt >> mergelog.txt 2>&1
-        trjconv -f $trajectory_trr -t0 0 -timestep $dt -o ./temp2.trr >> mergelog.txt 2>&1
+        trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
-        # Time runs from max to min, so we want frame timestep-min/dt
-        echo $max - $timestep
-	frameno=$(echo $max - $timestep | bc -l)
-        trjconv -dump $frameno -f ./temp2.trr -t0 $timestep -o temp.trr >> mergelog.txt 2>&1
-        rm ./temp2.trr  >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
+        rm temp2.trr  >> mergelog.txt 2>&1
     fi
 }
 
@@ -108,36 +110,14 @@ add_to_traj(){
     else
         echo "Create the first frame for $outname, now appending"
         dump
-        mv ./temp.trr ./$outname
+        mv temp.trr $outname >> mergelog.txt 2>&1
     fi
 }
 
 process_accept(){
     echo "Shooting_Point New_Shooting_Point Shooting_Frame" >> shootingpoint-run$run.txt 2>&1
 
-    # now we assemble the trajectory, as written in the .dat file
-    # regex to find the time of the frame and the corresponding tpr/xtc file
-    regex='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
-
-    file="$DIR/$run-$try.dat"
-    while IFS= read line
-    do
-        # we apply the regex to the line
-        [[ $line =~ $regex ]]
-
-        timestep=${BASH_REMATCH[1]}
-        trajectory_trr=$DIR/${BASH_REMATCH[2]}
-        ext='.trr'
-        trajectory_xtc=${trajectory_trr%$ext}.xtc
-        re='-*[0-9]+.[0-9]+'
-        if [[ $timestep =~ $re ]] ; then
-            add_to_traj
-        fi
-    done <"$file"
-    echo " done, written as ./$outname!"
-    ext='.trr'
     echo "Setting the time at 0, shooting point is computed and stored now."
-
     # Find the shooting point
     originalshootingpoint=0
     if [ -f $DIR/$run-$try-FW.dat ]
@@ -210,10 +190,33 @@ process_accept(){
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
     echo "$shootingpoint $newshootingpoint $shootingframe" >> shootingpoint-run$run.txt 2>&1
+    shift='-$minrun'
+    echo 'The shift is $shift'
+    # now we assemble the trajectory, as written in the .dat file
+    # regex to find the time of the frame and the corresponding tpr/xtc file
+    regex='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
 
+    file="$DIR/$run-$try.dat"
+    while IFS= read line
+    do
+        # we apply the regex to the line
+        [[ $line =~ $regex ]]
+
+        timestep=${BASH_REMATCH[1]}
+        trajectory_trr=$DIR/${BASH_REMATCH[2]}
+        ext='.trr'
+        trajectory_xtc=${trajectory_trr%$ext}.xtc
+        re='-*[0-9]+.[0-9]+'
+        if [[ $timestep =~ $re ]] ; then
+            add_to_traj
+        fi
+    done <"$file"
+
+    echo " done, written as ./$outname!"
+    ext='.trr'
     # Shifting the starting time to t0 for good measure
     trjconv -f ./$outname -t0 0 -o ./$outname >> mergelog.txt 2>&1
-    rm \#*.1\#
+    rm \#*.1\# >> mergelog.txt 2>&1
     echo "Making an .xtc of the .trr..."
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
 }

@@ -10,7 +10,8 @@
 \setlength\parindent{15pt}
 \lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
 
-% TODO:change for non-Carbon
+% https://www.dropbox.com/s/5erwtsptqm2im82/log-DNAbaserolling.pdf?dl=0
+% does it need more math?
 
 \begin{document}
 
@@ -18,14 +19,18 @@
 
 \subsection*{Introduction}
 
-% https://www.dropbox.com/s/5erwtsptqm2im82/log-DNAbaserolling.pdf?dl=0
-In this tutorial the useage of the \textsc{TIPSI} package is demonstrated. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, where transitions between the two states are extremely rare. MORE INFORMATION TPS and GROMACS.
+Consider a system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) techniques to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a timescale of milliseconds, for instance. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
 
-We use the THING \textsc{TIPSI}. Hoogsteen and Watson-Crick config.
+If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones quickly after. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
 
-This tutorial is written for \textsc{TIPSI} version 0.1, which relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. Git is required to pull the repository with the demonstration files. For visualizing structures, we recommend the VMD package. This tutorial is written assuming you work on a Linux systemWe assume some knowledge in working with Linux (\texttt{cd} and \texttt{ls} command), as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial. This version of the tutorial assumes you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
+% TODO: picture from slides Jocelyne
 
-Stukje over hoe het opgezet is naast het protocol, welk field en alles.
+
+In this tutorial the useage of the \textsc{TIPSI} package (version 0.1) is demonstrated. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns dipeptide alanine, and samples a transition between its two conformations. The second example concerns a transition which is actually a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing (Fig.~\ref{Hoogsteen}). 
+
+\textsc{TIPSI} relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. \textsc{Git} is required to pull the repository with the demonstration files. For visualizing structures, the VMD package is recommended. This tutorial is written assuming you work on a Linux system. We assume some knowledge in working with Linux, as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial. Finally, it is assumed you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
+
+% TODO: Stukje over hoe het opgezet is naast het protocol, welk field en alles.
 
 \subsection*{Preparatory Analysis}
 
