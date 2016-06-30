@@ -148,22 +148,17 @@ process_accept(){
             [[ $line =~ $regex ]]
             ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
-        maxsp=${ARRAY[0]}
         minsp=${ARRAY[0]}
 
         # Loop through all elements in the array
         for i in "${ARRAY[@]}"
         do
-            # Update max if applicable
-            if [[ $(echo $i '>' $maxsp | bc -l) == 1 ]]; then
-                maxsp="$i"
-            fi
-
             # Update min if applicable
             if [[ $(echo $i '<' $minsp | bc -l) == 1 ]]; then
                 minsp="$i"
             fi
         done
+	echo $minsp - $dt
         shootingpoint=$(echo $minsp - $dt | bc -l)
     else    
         file="$DIR/$run-$try-BW.dat"
@@ -175,7 +170,6 @@ process_accept(){
             ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
         maxsp=${ARRAY[0]}
-        minsp=${ARRAY[0]}
 
         # Loop through all elements in the array
         for i in "${ARRAY[@]}"
@@ -183,11 +177,6 @@ process_accept(){
             # Update max if applicable
             if [[ $(echo $i '>' $maxsp | bc -l) == 1 ]]; then
                 maxsp="$i"
-            fi
-
-            # Update min if applicable
-            if [[ $(echo $i '<' $minsp | bc -l) == 1 ]]; then
-                minsp="$i"
             fi
         done
         originalshootingpoint=$(echo $maxsp + $dt | bc -l)
