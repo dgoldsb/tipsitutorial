@@ -14,7 +14,8 @@ dump(){
     trydsrc=$(basename $dumpsource)
     rundsrc=$(basename $(dirname $dumpsource))
     newtimestep=$(echo $timestep + $shift | bc -l)
-    
+    echo Dumping frame at timestamp $timestep from $trajectory_trr with timestamp $newtimestep
+
     # We want to find the start and end of each trajectory, and if it is backward
     # We read this from a dat-file
     regexdump='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+\S+\s+'
@@ -53,13 +54,16 @@ dump(){
 	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
+        frameno=$(echo $max - $timestep | bc -l)	
 	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
-        # And dump the frame we want
-        trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
-        rm temp2.trr  >> mergelog.txt 2>&1
+	# And dump the frame we want
+        echo $frameno
+	trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
+        gmxcheck -f temp.trr
+	rm temp2.trr  >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
@@ -103,19 +107,20 @@ dump(){
 add_to_traj(){
     if [ -f "./$outname" ]
     then
-        echo -n "."
+        #echo -n "."
         dump
         trjcat -f $outname temp.trr -o $outname >> mergelog.txt 2>&1
         rm temp.trr >> mergelog.txt 2>&1
     else
         echo "Create the first frame for $outname, now appending"
         dump
-        mv temp.trr $outname >> mergelog.txt 2>&1
+        mv temp.trr $outname
     fi
 }
 
 process_accept(){
     echo "Shooting_Point New_Shooting_Point Shooting_Frame" >> shootingpoint-run$run.txt 2>&1
+    regex='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
 
     echo "Setting the time at 0, shooting point is computed and stored now."
     # Find the shooting point
@@ -140,7 +145,8 @@ process_accept(){
                 minsp="$i"
             fi
         done
-	echo $minsp - $dt
+	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
+	echo Shooting point: $minsp - $dt
         shootingpoint=$(echo $minsp - $dt | bc -l)
     else    
         file="$DIR/$run-$try-BW.dat"
@@ -161,8 +167,10 @@ process_accept(){
                 maxsp="$i"
             fi
         done
-	echo Shooting point: $maxsp + $dt
+	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
+	echo $dt
         originalshootingpoint=$(echo $maxsp + $dt | bc -l)
+    	echo Shooting point is $originalshootingpoint
     fi
     
     # Find out how much we shift everything
@@ -184,17 +192,15 @@ process_accept(){
             minrun="$i"
         fi
     done
-    echo Shifted shooting point: $originalshootingpoint - $minrun
     newshootingpoint=$(echo $originalshootingpoint - $minrun | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
     echo "$shootingpoint $newshootingpoint $shootingframe" >> shootingpoint-run$run.txt 2>&1
-    shift='-$minrun'
-    echo 'The shift is $shift'
+    shift=$(echo - $minrun)
+    echo "The shift is $shift"
     # now we assemble the trajectory, as written in the .dat file
     # regex to find the time of the frame and the corresponding tpr/xtc file
-    regex='[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
 
     file="$DIR/$run-$try.dat"
     while IFS= read line
@@ -213,7 +219,9 @@ process_accept(){
     done <"$file"
 
     echo " done, written as ./$outname!"
-    ext='.trr'
+    
+    gmxcheck -f $outname
+    ext='.trr'    
     # Shifting the starting time to t0 for good measure
     trjconv -f ./$outname -t0 0 -o ./$outname >> mergelog.txt 2>&1
     rm \#*.1\# >> mergelog.txt 2>&1
