@@ -5,7 +5,7 @@
 # Trjconv setting can be edited by changing what is written to trjconvopts.txt, standard is all atoms, centered for the protein
 
 dump(){
-    # We want to dump frame with timestamp $timestep
+    # We want to dump frame with timestamp $timestamp
     # The directory of the current path is $DIR
     # We dump from $trajectory_trr
     # We shift by $shift
@@ -13,8 +13,8 @@ dump(){
     dumpsource=$(dirname $trajectory_trr)
     trydsrc=$(basename $dumpsource)
     rundsrc=$(basename $(dirname $dumpsource))
-    newtimestep=$(echo $timestep + $shift | bc -l)
-    echo Dumping frame at timestamp $timestep from $trajectory_trr with timestamp $newtimestep
+    newtimestamp=$(echo $timestamp + $shift | bc -l)
+    echo Dumping frame at timestamp $timestamp from $trajectory_trr with timestamp $newtimestamp
 
     # We want to find the start and end of each trajectory, and if it is backward
     # We read this from a dat-file
@@ -54,14 +54,14 @@ dump(){
 	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-        frameno=$(echo $max - $timestep | bc -l)	
+        frameno=$(echo $timestamp - $min | bc -l)	
 	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
 	# And dump the frame we want
         echo $frameno
-	trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
+	trjconv -dump $frameno -f temp2.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
         gmxcheck -f temp.trr
 	rm temp2.trr  >> mergelog.txt 2>&1
     else
@@ -93,13 +93,13 @@ dump(){
 	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[0]} '-' ${ARRAY[1]} | bc -l)
-	frameno=$(echo $max - $timestep | bc -l)
+	frameno=$(echo $max - $timestamp | bc -l)
 	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
-        trjconv -dump $frameno -f temp2.trr -t0 $newtimestep -o temp.trr >> mergelog.txt 2>&1
+        trjconv -dump $frameno -f temp2.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
         rm temp2.trr  >> mergelog.txt 2>&1
     fi
 }
@@ -208,12 +208,12 @@ process_accept(){
         # we apply the regex to the line
         [[ $line =~ $regex ]]
 
-        timestep=${BASH_REMATCH[1]}
+        timestamp=${BASH_REMATCH[1]}
         trajectory_trr=$DIR/${BASH_REMATCH[2]}
         ext='.trr'
         trajectory_xtc=${trajectory_trr%$ext}.xtc
         re='-*[0-9]+.[0-9]+'
-        if [[ $timestep =~ $re ]] ; then
+        if [[ $timestamp =~ $re ]] ; then
             add_to_traj
         fi
     done <"$file"
