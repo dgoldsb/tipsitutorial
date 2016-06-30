@@ -138,6 +138,7 @@ process_accept(){
     echo "Setting the time at 0, shooting point is computed and stored now."
 
     # Find the shooting point
+    originalshootingpoint=0
     if [ -f $DIR/$run-$try-FW.dat ]
     then
         file="$DIR/$run-$try-FW.dat"
@@ -179,6 +180,7 @@ process_accept(){
                 maxsp="$i"
             fi
         done
+	echo Shooting point: $maxsp + $dt
         originalshootingpoint=$(echo $maxsp + $dt | bc -l)
     fi
     
@@ -197,10 +199,11 @@ process_accept(){
     for i in "${ARRAY[@]}"
     do
         # Update min if applicable
-        if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
+        if [[ $(echo $i '<' $minrun | bc -l) == 1 ]]; then
             minrun="$i"
         fi
     done
+    echo Shifted shooting point: $originalshootingpoint - $minrun
     newshootingpoint=$(echo $originalshootingpoint - $minrun | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
@@ -208,8 +211,8 @@ process_accept(){
     echo "$shootingpoint $newshootingpoint $shootingframe" >> shootingpoint-run$run.txt 2>&1
 
     # Shifting the starting time to t0 for good measure
-    trjconv -f ./$outname -t0 0 -o ./$outname
-    rm \#$outname.1\#
+    trjconv -f ./$outname -t0 0 -o ./$outname >> mergelog.txt 2>&1
+    rm \#*.1\#
     echo "Making an .xtc of the .trr..."
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
 }
