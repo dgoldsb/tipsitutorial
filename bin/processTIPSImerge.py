@@ -6,6 +6,12 @@ from turtle import *
 import turtle
 import csv
 
+# Goals: 
+# Tree
+# Average path length
+# Ratio forward/backward
+# Number of decorrelated paths
+
 # Open the CSV
 f = open(sys.argv[1], 'rt')
 try:

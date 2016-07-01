@@ -228,7 +228,7 @@ process_accept(){
         dumpsource=$(dirname $trajectory_trr)
         trydsrc=$(basename $dumpsource)
         rundsrc=$(basename $(dirname $dumpsource))
-        composition="$composition$rundsrc"
+        composition="$composition-$rundsrc-"
 
 	    if [[ $timestamp =~ $re ]] ; then
             ((counter++))
