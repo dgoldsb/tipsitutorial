@@ -161,7 +161,7 @@ The output will be put in the \texttt{\textcolor{blue}{output}} directory.
 
 To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of ome collective variable. In this example, we use the radius of gyration and the dihedral angle over atoms (5, 7, 9, 15).
 
-# NOTE: applied -1 here to run in TIPSI
+NOTE: applied -1 here to run in TIPSI
 
 [ Protein ]
   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
@@ -359,6 +359,30 @@ qsub submit_tipsi
 \subsubsection*{Analyzing Results from TIPSI}
 
 resname resid 9DT, 4DA
+
+\begin{lstlisting}
+# Dirty index file written in vim, should suffice
+[bp]
+275 492
+[wc]
+276 495
+[hg]
+276 289
+[glycosydic angle]
+483 484 486 499
+[bp1]
+275
+[bp2]
+492
+[wc1]
+276
+[wc2]
+495
+[hg1]
+276
+[hg2]
+489
+\end{lstlisting}
 
 % TODO: Putting trajectories together
 % TODO: Treeplot
