@@ -56,9 +56,9 @@ which will copy the tutorial directory as a new directory in your current folder
 \textcolor{blue}{dnabr-equilibratedpath} \textcolor{blue}{dnabr-input} \textcolor{blue}{output} README.md
 \end{lstlisting}
 %
-The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this tutorial are included in \texttt{\textcolor{blue}{input}}, and output will be written into \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
+The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this tutorial are included in \texttt{\textcolor{blue}{dipeptala-input}}, and output will be written into \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
 
-We enter the directory \texttt{\textcolor{blue}{input}} and explore, which shows the following 8 files:
+We enter the directory \texttt{\textcolor{blue}{dipeptala-input} } and explore, which shows the following 8 files:
 %
 \begin{lstlisting}
 dipeptala.pdb emw.mdp highT.mdp posre.mdp 
@@ -67,7 +67,10 @@ submit_highT submit_md em.mdp md.mdp
 %
 The \texttt{.gro} file contains the structure of the molecule we simulate, in our case dipeptide analine. To view this structure, copy the file to your own PC using a secure copy command, and view the structure in VMD. A nice piece of software that can help in copying files is FileZilla, which provides a GUI for secure copy.
 
-Already added solvent, did an energy minimaztion and contrained run. Now that we have relaxed the solvent we can run the MD simulation. Typically when preparing for \textsc{TIPSI} we run at two temperatures, room temperature (298K) and a higher temperature (400K). Here we do room only, otherwise denatures completely. The simulation at room temperature shows the stable state at the temperature we are interested in. At the higher temperature, the system will transition more easily to the second stable state. This simulation will provide the initial transition trajectory, and also helps us define the two stable states. We run these by entering:
+> HIGH AND LOW
+> ASK JOCELYN, SHOULD I DO THE ENERGY MINIMAZATION AGAIN?
+
+Already added solvent, did an energy minimization and contrained run. Now that we have relaxed the solvent we can run the MD simulation. Typically when preparing for \textsc{TIPSI} we run at two temperatures, room temperature (298K) and a higher temperature (400K). Here we do room only, otherwise denatures completely. The simulation at room temperature shows the stable state at the temperature we are interested in. At the higher temperature, the system will transition more easily to the second stable state. This simulation will provide the initial transition trajectory, and also helps us define the two stable states. We run these by entering:
 %
 \begin{lstlisting}
 grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
