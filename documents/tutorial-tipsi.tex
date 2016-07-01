@@ -4,7 +4,6 @@
 \usepackage{listings}
 \usepackage[tmargin=1in,bmargin=1in,lmargin=1.25in,rmargin=1.25in]{geometry}
 \usepackage{titlesec}
-\usepackage[T1]{fontenc}
 \titleformat*{\section}{\Large\bfseries\sffamily}
 \titleformat*{\subsection}{\large\bfseries\sffamily}
 
@@ -18,6 +17,11 @@
 % how do I run tipsi longer?
 % inspect all submit files in the tutorial
 % make readme nice, inclue contact info
+% executables in bin, bit more discussion dnabr results
+% dnabr minimaal
+% voorbeeldoutput, alleen de kleine files, alleen top nodig
+% GMXLIB
+% genereer tpr zelf, verander timestep naar de juiste, oude verwijderen
 
 \begin{document}
 
@@ -30,6 +34,8 @@ Consider a system that can be in two stable states, which we label as state $A$ 
 If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones quickly after. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
 
 % TODO: picture from slides Jocelyne
+
+% TODO: acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
 
 In this tutorial the useage of the \textsc{TIPSI} package (version 0.1) is demonstrated. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns dipeptide alanine, and samples a transition between its two conformations. The second example concerns a transition which is actually a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing (Fig.~\ref{Hoogsteen}). This example uses a provided result of a metadynamics simulation as input. 
 
@@ -156,6 +162,8 @@ grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
 \end{lstlisting}
 %
 The output will be put in the \texttt{\textcolor{blue}{output}} directory.
+
+LAGE TEMP TOCH WEL, MAAR KORT, 10 nanosec, is het echt stabiel?
 
 \subsubsection*{Running TIPSI}
 

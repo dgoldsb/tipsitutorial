@@ -19,47 +19,49 @@ dump(){
     if [ -f "$dumpsource/$rundsrc-$trydsrc-FW.dat" ] || [ -f "$dumpsource/0-0.dat" ]
     then
         if [ -f "$dumpsource/0-0.dat" ]
-	then    
+        then
             file="$dumpsource/0-0.dat"
         else
-	    file="$dumpsource/$rundsrc-$trydsrc-FW.dat"
+	        file="$dumpsource/$rundsrc-$trydsrc-FW.dat"
         fi
-	ARRAY=()
+        head $file; tail $file >> ht.txt
+        file="ht.txt"
+	    ARRAY=()
         while IFS= read line
             do
             # we apply the regex to the line
             [[ $line =~ $regex ]]
             ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
-	max=${ARRAY[0]}
-	min=${ARRAY[0]}
+	    max=${ARRAY[0]}
+	    min=${ARRAY[0]}
+        rm ht.txt
 
-	# Loop through all elements in the array
-	for i in "${ARRAY[@]}"
-	do
-	    # Update max if applicable
-	    if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
-		max="$i"
-	    fi
-	    
-	    # Update min if applicable
-	    if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
-	        min="$i"
+        # Loop through all elements in the array
+        for i in "${ARRAY[@]}"
+        do
+            # Update max if applicable
+            if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
+        	    max="$i"
             fi
-	done
-	
-	echo Maximum is $max >> mergelog.txt 2>&1
-	echo Minimum is $min >> mergelog.txt 2>&1
+            # Update min if applicable
+            if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
+                min="$i"
+            fi
+        done
+
+        echo Maximum is $max >> mergelog.txt 2>&1
+        echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-        frameno=$(echo $timestamp '-' $min | bc -l)	
-	echo dt is $dt >> mergelog.txt 2>&1
-        
+        frameno=$(echo $timestamp '-' $min | bc -l)
+        echo dt is $dt >> mergelog.txt 2>&1
+
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
-	# And dump the frame we want
-	trjconv -dump $frameno -f temp2.trr -o temp3.trr >> mergelog.txt 2>&1
+        # And dump the frame we want
+        trjconv -dump $frameno -f temp2.trr -o temp3.trr >> mergelog.txt 2>&1
         trjconv -f temp3.trr -t0 $newtimestamp -o temp.trr >> mergelog.txt 2>&1
-	rm temp2.trr temp3.trr  >> mergelog.txt 2>&1
+        rm temp2.trr temp3.trr  >> mergelog.txt 2>&1
     else
         file="$dumpsource/$rundsrc-$trydsrc-BW.dat"
         ARRAY=()
@@ -74,24 +76,24 @@ dump(){
 
         # Loop through all elements in the array
         for i in "${ARRAY[@]}"
-	do
-	    # Update max if applicable
-	    if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
-		max="$i"
-	    fi
-	    
-	    # Update min if applicable
-	    if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
-	        min="$i"
-            fi
-	done
+            do
+            # Update max if applicable
+	        if [[ $(echo $i '>' $max | bc -l) == 1 ]]; then
+		        max="$i"
+	        fi
 
-	echo Maximum is $max >> mergelog.txt 2>&1
-	echo Minimum is $min >> mergelog.txt 2>&1
+	    # Update min if applicable
+	        if [[ $(echo $i '<' $min | bc -l) == 1 ]]; then
+	            min="$i"
+            fi
+	    done
+
+    	echo Maximum is $max >> mergelog.txt 2>&1
+    	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[0]} '-' ${ARRAY[1]} | bc -l)
-	frameno=$(echo $max '-' $timestamp | bc -l)
-	echo dt is $dt >> mergelog.txt 2>&1
-        
+    	frameno=$(echo $max '-' $timestamp | bc -l)
+    	echo dt is $dt >> mergelog.txt 2>&1
+
         # Now we can overwrite the times...
         trjconv -f $trajectory_trr -t0 0 -timestep $dt -o temp2.trr >> mergelog.txt 2>&1
         # And dump the frame we want
@@ -125,12 +127,15 @@ process_accept(){
     then
         file="$DIR/$run-$try-FW.dat"
         ARRAY=()
+        head $file; tail $file >> ht.txt
+        file="ht.txt"
         while IFS= read line
             do
             # we apply the regex to the line
             [[ $line =~ $regex ]]
             ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
+        rm ht.txt
         minsp=${ARRAY[0]}
 
         # Loop through all elements in the array
@@ -144,15 +149,18 @@ process_accept(){
 	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
 	echo "Shooting point: $minsp - $dt"
         shootingpoint=$(echo $minsp - $dt | bc -l)
-    else    
+    else
         file="$DIR/$run-$try-BW.dat"
         ARRAY=()
+        head $file; tail $file >> ht.txt
+        file="ht.txt"
         while IFS= read line
             do
             # we apply the regex to the line
             [[ $line =~ $regex ]]
             ARRAY+=(${BASH_REMATCH[1]})
         done <"$file"
+        rm ht.txt
         maxsp=${ARRAY[0]}
 
         # Loop through all elements in the array
@@ -167,16 +175,19 @@ process_accept(){
         originalshootingpoint=$(echo $maxsp + $dt | bc -l)
     	echo Shooting point is $originalshootingpoint
     fi
-    
+
     # Find out how much we shift everything
     file="$DIR/$run-$try.dat"
     ARRAY=()
+    head $file; tail $file >> ht.txt
+    file="ht.txt"
     while IFS= read line
         do
         # we apply the regex to the line
         [[ $line =~ $regex ]]
         ARRAY+=(${BASH_REMATCH[1]})
     done <"$file"
+    rm ht.txt
     minrun=${ARRAY[0]}
     maxrun=${ARRAY[0]}
     # Loop through all elements in the array
@@ -187,9 +198,9 @@ process_accept(){
             minrun="$i"
         fi
 
-	if [[ $(echo $maxrun '<' $i | bc -l) == 1 ]]; then
-	    maxrun="$i"
-	fi
+	    if [[ $(echo $maxrun '<' $i | bc -l) == 1 ]]; then
+	        maxrun="$i"
+	    fi
     done
     newshootingpoint=$(echo $originalshootingpoint - $minrun | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
@@ -213,24 +224,24 @@ process_accept(){
         ext='.trr'
         trajectory_xtc=${trajectory_trr%$ext}.xtc
         re='-*[0-9]+.[0-9]+'
-        
+
         dumpsource=$(dirname $trajectory_trr)
         trydsrc=$(basename $dumpsource)
         rundsrc=$(basename $(dirname $dumpsource))
         composition=$composition$rundsrc
 
-	if [[ $timestamp =~ $re ]] ; then
-            ((counter++))    
-	    echo "We now make the trajectory of length $counter, check if this is right!" >> mergelog.txt 2>&1
-	    add_to_traj
+	    if [[ $timestamp =~ $re ]] ; then
+            ((counter++))
+	        echo "We now make the trajectory of length $counter, check if this is right!" >> mergelog.txt 2>&1
+	        add_to_traj
         fi
     done <"$file"
 
     echo "Done, written as $outname!"
-    
+
     echo Should have $counter frames, you can check in the mergelog...
     gmxcheck -f $outname >> mergelog.txt 2>&1
-    ext='.trr'    
+    ext='.trr'
     # Shifting the starting time to t0 for good measure
     trjconv -f ./$outname -t0 0 -o ./$outname >> mergelog.txt 2>&1
     rm \#*.1\# >> mergelog.txt 2>&1
@@ -261,11 +272,10 @@ for file in */*/PARENT ; do
         echo "$file is accepted, proceeding..."
         try=$(basename $DIR)
         run=$(basename $(dirname $DIR))
-        outname=./totalpath_run$run.trr                
+        outname=./totalpath_run$run.trr
         process_accept
     else
         echo "$file is rejected, skipping to next..."
     fi
 done
 rm trjconvopts.txt
-
