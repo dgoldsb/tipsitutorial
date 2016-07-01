@@ -122,9 +122,11 @@ process_accept(){
 
     echo "Setting the time at 0, shooting point is computed and stored now."
     # Find the shooting point
-    originalshootingpoint=0
+    shootingpoint=0
+    direction=''
     if [ -f $DIR/$run-$try-FW.dat ]
     then
+        direction='FW'
         file="$DIR/$run-$try-FW.dat"
         ARRAY=()
         (head; tail) < $file >> ht.txt
@@ -146,10 +148,11 @@ process_accept(){
                 minsp="$i"
             fi
         done
-	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-	echo "Shooting point: $minsp - $dt"
+	    dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
         shootingpoint=$(echo $minsp - $dt | bc -l)
+    	echo "Shooting point is $shootingpoint"
     else
+        direction='BW'
         file="$DIR/$run-$try-BW.dat"
         ARRAY=()
         (head; tail) < $file >> ht.txt
@@ -171,9 +174,9 @@ process_accept(){
                 maxsp="$i"
             fi
         done
-	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-        originalshootingpoint=$(echo $maxsp + $dt | bc -l)
-    	echo Shooting point is $originalshootingpoint
+	    dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
+        shootingpoint=$(echo $maxsp + $dt | bc -l)
+    	echo "Shooting point is $shootingpoint"
     fi
 
     # Find out how much we shift everything
@@ -202,9 +205,10 @@ process_accept(){
 	        maxrun="$i"
 	    fi
     done
+    
     shift=$(echo - $minrun)
     echo "Shift: $shift"
-    newshootingpoint=$(echo $originalshootingpoint '+' $shift | bc -l)
+    newshootingpoint=$(echo $shootingpoint '+' $shift | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
@@ -248,13 +252,13 @@ process_accept(){
     echo "Making an .xtc of the .trr..."
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
 
-    echo "SHIFT: $shift SHOOTING: $shootingpoint NEWSHOOTING: $newshootingpoint"
-    echo "$run,$shootingpoint,$newshootingpoint,$shootingframe,$minrun,$maxrun,$composition" >> metainfo.csv 2>&1
+    echo "SHIFT: $shift SHOOTING: $shootingpoint NEWSHOOTING: $newshootingpoint" >> mergelog.txt 2>&1
+    echo "$run,$shootingpoint,$newshootingpoint,$shootingframe,$minrun,$maxrun,$composition,$direction" >> metainfo.csv 2>&1
 
 }
 
 rm mergelog.txt metainfo.csv totalpath_run*
-echo "Run,Shooting point,Shifted shooting point,Shooting frame,Minimum of trajectory,Maximum of trajectory,Composition" >> metainfo.csv 2>&1
+echo "Run,SP,SSP,SF,MIN,MAX,COMP,DIR" >> metainfo.csv 2>&1
 echo -e "1\n0" > trjconvopts.txt
 echo "Make sure there are no files called totalpath_runx.trr!"
 echo "Also note that all paths start at t=0, to avoid negative frame numbers!"
