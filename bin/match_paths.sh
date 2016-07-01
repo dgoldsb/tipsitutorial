@@ -248,12 +248,13 @@ process_accept(){
     echo "Making an .xtc of the .trr..."
     trjconv -f ./$outname -s ../md.tpr -pbc mol -center -ur compact -o ${outname%$ext}.xtc < trjconvopts.txt >> mergelog.txt 2>&1
 
-    echo "$run,$shootingpoint,$newshootingpoint,$shootingframe,$minrun,$maxrun,$composition" >> meta_info.csv 2>&1
+    echo "SHIFT: $shift SHOOTING: $shootingpoint NEWSHOOTING: $newshootingpoint"
+    echo "$run,$shootingpoint,$newshootingpoint,$shootingframe,$minrun,$maxrun,$composition" >> metainfo.csv 2>&1
 
 }
 
-rm mergelog.txt totalpath_run*
-echo "Run,Shooting point,Shifted shooting point,Shooting frame,Minimum of trajectory,Maximum of trajectory,Composition" >> meta_info.csv 2>&1
+rm mergelog.txt metainfo.csv totalpath_run*
+echo "Run,Shooting point,Shifted shooting point,Shooting frame,Minimum of trajectory,Maximum of trajectory,Composition" >> metainfo.csv 2>&1
 echo -e "1\n0" > trjconvopts.txt
 echo "Make sure there are no files called totalpath_runx.trr!"
 echo "Also note that all paths start at t=0, to avoid negative frame numbers!"
