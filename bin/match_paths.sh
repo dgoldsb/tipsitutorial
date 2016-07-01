@@ -24,7 +24,7 @@ dump(){
         else
 	        file="$dumpsource/$rundsrc-$trydsrc-FW.dat"
         fi
-        head $file; tail $file >> ht.txt
+        (head; tail) < $file >> ht.txt
         file="ht.txt"
 	    ARRAY=()
         while IFS= read line
@@ -127,7 +127,7 @@ process_accept(){
     then
         file="$DIR/$run-$try-FW.dat"
         ARRAY=()
-        head $file; tail $file >> ht.txt
+        (head; tail) < $file >> ht.txt
         file="ht.txt"
         while IFS= read line
             do
@@ -152,7 +152,7 @@ process_accept(){
     else
         file="$DIR/$run-$try-BW.dat"
         ARRAY=()
-        head $file; tail $file >> ht.txt
+        (head; tail) < $file >> ht.txt
         file="ht.txt"
         while IFS= read line
             do
@@ -179,7 +179,7 @@ process_accept(){
     # Find out how much we shift everything
     file="$DIR/$run-$try.dat"
     ARRAY=()
-    head $file; tail $file >> ht.txt
+    (head; tail) < $file >> ht.txt
     file="ht.txt"
     while IFS= read line
         do
