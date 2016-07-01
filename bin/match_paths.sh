@@ -202,12 +202,12 @@ process_accept(){
 	        maxrun="$i"
 	    fi
     done
-    newshootingpoint=$(echo $originalshootingpoint - $minrun | bc -l)
+    shift=$(echo - $minrun)
+    echo "Shift: $shift"
+    newshootingpoint=$(echo $originalshootingpoint '+' $shift | bc -l)
     dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
-    shift=$(echo - $minrun)
-    echo "Shift: $shift"
 
     # now we assemble the trajectory, as written in the .dat file
     # regex to find the time of the frame and the corresponding tpr/xtc file
