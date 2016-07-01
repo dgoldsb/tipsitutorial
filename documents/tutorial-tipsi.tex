@@ -52,7 +52,8 @@ git clone https://dgoldsb@bitbucket.org/dgoldsb/tipsi-tutorial.git
 which will copy the tutorial directory as a new directory in your current folder. Exploring the folder shows the following subfolders:
 %
 \begin{lstlisting}
-%*\textcolor{blue}{bin} \textcolor{blue}{documents} \textcolor{blue}{input} \textcolor{blue}{output} README.md
+%*\textcolor{blue}{bin} \textcolor{blue}{documents} \textcolor{blue}{dipeptala-input} 
+\textcolor{blue}{dnabr-equilibratedpath} \textcolor{blue}{dnabr-input} \textcolor{blue}{output} README.md
 \end{lstlisting}
 %
 The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this tutorial are included in \texttt{\textcolor{blue}{input}}, and output will be written into \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
@@ -349,6 +350,7 @@ g_angle -f 000003.trr -n ../dnabr-input/index.ndx -ov dihed.xvg -type dihedral
 g_gyrate -f lowT.xtc -s lowT.tpr -o gyr_lowT.xvg
 ```
 
+
 \newpage
 \section*{TIPSI Cheatsheet}
 
@@ -357,9 +359,9 @@ g_gyrate -f lowT.xtc -s lowT.tpr -o gyr_lowT.xvg
 In general, we run \textsc{tipsi} using the \texttt{run tipsi}-script included in the \textcolor{blue}{\texttt{./bin/tipsi/calculator}}-directory. 
 Examining this script reveals that \textsc{tipsi} takes the following input parameters in the case of this tutorial:
 
-\begin{lslisting}
+\begin{lstlisting}
 ./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps.par -ndx index.ndx -maxc 10 -np 16 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "\$MDRUN"
-\end{lslisting}
+\end{lstlisting}
 
 The parameter \texttt{-v} enables verbose output, which is written to the \texttt{O}-file in the output directory. 
 In general this is helpful, as it will give some indication of where things go wrong when a run fails. 
@@ -380,12 +382,12 @@ A list of all functions, and their parameters, will be provided in this appendix
 Third, we have to define the states of the system using these parameters.
 The states are a boolean expression, written in Python-syntax. An example is:
 
-\begin{lslisting}
+\begin{lstlisting}
 state A = (0.25 < wc & wc < 0.35 & 0.38 < hg)
 state B = (0.25 < hg & hg < 0.35 & 0.38 < wc)
 
 interface I = (!A) & (!B)
-\end{lslisting}
+\end{lstlisting}
 
 It is noteworthy that \textsc{tipsi} seems to not handle excessive brackets well, so try to keep your statement within a single pair of brackets, and use the priority order of different operators to your advantage.
 The intermediate state is always defined as not A and not B.

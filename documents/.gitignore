@@ -1,1 +1,5 @@
 *.pyg
+*.synctex.gz
+*.blg
+*.bbl
+*.log
