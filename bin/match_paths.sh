@@ -51,7 +51,7 @@ dump(){
 	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-        frameno=$(echo $timestamp - $min | bc -l)	
+        frameno=$(echo $timestamp '-' $min | bc -l)	
 	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
@@ -89,7 +89,7 @@ dump(){
 	echo Maximum is $max >> mergelog.txt 2>&1
 	echo Minimum is $min >> mergelog.txt 2>&1
         dt=$(echo ${ARRAY[0]} '-' ${ARRAY[1]} | bc -l)
-	frameno=$(echo $max - $timestamp | bc -l)
+	frameno=$(echo $max '-' $timestamp | bc -l)
 	echo dt is $dt >> mergelog.txt 2>&1
         
         # Now we can overwrite the times...
@@ -142,7 +142,7 @@ process_accept(){
             fi
         done
 	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-	echo Shooting point: $minsp - $dt
+	echo "Shooting point: $minsp - $dt"
         shootingpoint=$(echo $minsp - $dt | bc -l)
     else    
         file="$DIR/$run-$try-BW.dat"
@@ -164,7 +164,6 @@ process_accept(){
             fi
         done
 	dt=$(echo ${ARRAY[1]} '-' ${ARRAY[0]} | bc -l)
-	echo $dt
         originalshootingpoint=$(echo $maxsp + $dt | bc -l)
     	echo Shooting point is $originalshootingpoint
     fi
@@ -197,10 +196,10 @@ process_accept(){
     shootingframe=$(echo $newshootingpoint / $dt | bc -l)
     # Store in a file
     shift=$(echo - $minrun)
-    echo "The shift is $shift"
+    echo "Shift: $shift"
+
     # now we assemble the trajectory, as written in the .dat file
     # regex to find the time of the frame and the corresponding tpr/xtc file
-
     counter=0
     composition=""
     file="$DIR/$run-$try.dat"
@@ -222,11 +221,12 @@ process_accept(){
 
 	if [[ $timestamp =~ $re ]] ; then
             ((counter++))    
+	    echo "We now make the trajectory of length $counter, check if this is right!" >> mergelog.txt 2>&1
 	    add_to_traj
         fi
     done <"$file"
 
-    echo "Done, written as ./$outname!"
+    echo "Done, written as $outname!"
     
     echo Should have $counter frames, you can check in the mergelog...
     gmxcheck -f $outname >> mergelog.txt 2>&1
