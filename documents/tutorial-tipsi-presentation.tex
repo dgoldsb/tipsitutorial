@@ -1,0 +1,225 @@
+\documentclass[hyperref={pdfpagelabels=false}]{beamer}
+\usepackage{lmodern}
+\usetheme{Frankfurt}
+\usepackage{natbib}
+\usepackage{apalike}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
+
+\title{A Tutorial for \textsc{TIPSI}, and How to Assemble Paths}
+\author{Dylan Goldsborough}
+\date{8\textsuperscript{th} of July 2016}
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame} 
+
+\begin{frame}
+\frametitle{Table of contents}
+\tableofcontents
+\end{frame} 
+
+%%% Introduction
+
+%% General starting slide
+\section{Introduction} 
+\subsection{Project summary}
+%% Who am I and what did I do?
+\begin{frame}
+\frametitle{Introduction}
+Who am I?
+\begin{itemize}
+\item Student at the computational science master
+\item Attended the course on biomolecular simulation
+\item Enjoyed figuring out \textsc{TIPSI}
+\item Did a project to write a tutorial that introduces \textsc{TIPSI} over the past months!
+\end{itemize}
+\end{frame}
+
+%% Structure
+\begin{frame}
+\frametitle{Structure}
+In this presentation I will:
+\begin{itemize}
+\item Give a brief recap of TPS
+\item Outline my contribution
+\item Discuss both the examples the tutorial offers
+\item Discuss the additional documentation
+\end{itemize} 
+\end{frame}
+
+%% What is TPS again?
+%% Likely preaching to the coir, so keep it at 5 slides
+\subsection{TPS recap}
+\begin{frame}
+\frametitle{What is TPS again?} 
+\end{frame}
+
+\begin{frame}
+\frametitle{What is TPS again?} 
+IMAGE
+\end{frame}
+
+%% What is TIPSI?
+% Redo of a Perl script
+% Tsjerk Wassenaar
+% Python
+% Bit of reverse engineering due to lack of documentation
+% Runs GROMACS in reverse time, no reverse velocities, which has pros and cons
+\begin{frame}
+\frametitle{What is \textsc{TIPSI}?} 
+\textsc{TIPSI} is a script by Tsjerk Wassenaar, which:
+\begin{itemize}
+\item Adaptation of a Perl script
+\item Written in Python
+\item It relies on \textsc{GROMACS} version 4.5.4
+\item Does random shooting moves forwards and backwards
+\item Reverses time for backward shooting
+\item A "molecular calculator"
+\end{itemize}
+\end{frame}
+
+%%% What did I write?
+\section{Contributions}
+\subsection{Test}
+
+%% xvg reading and plotting
+%% Bash to compile paths, was a bitch
+%% Python to analyze metadata
+\begin{frame}
+\frametitle{Contributions}
+I made several minor contributions to this project:
+\begin{itemize}
+\item Bash implementation to assemble paths
+\item Python script to analyze the paths
+\item Tutorial with a Python tool
+\end{itemize}
+\end{frame}
+
+%% Bash in more detail, how does this work?
+\begin{frame}
+\frametitle{Assembling paths}
+\textbf{The problem}: 
+\begin{itemize}
+\item \textsc{TIPSI} outputs shooting moves only
+\item Instructions on how the paths are made in \texttt{dat}-files
+\item Backward shooting moves are the wrong way around
+\item Negative timestamps
+\end{itemize}
+\textbf{Result}: assembling the paths is a minor nightmare...
+\end{frame}
+
+%% Mention that GROMACS does not like negative times...
+\begin{frame}
+\frametitle{Assembling paths}
+\textbf{The solution}: 
+\begin{itemize}
+\item Bashscripts that searches for directories with \texttt{ACCEPTED}-file
+\item Scans \texttt{dat}-file using regular expressions
+\item Overwrites timestamps
+\item Creates each path by dumping and appending single frames
+\item Stores some metainformation in a \texttt{csv}-file
+\end{itemize}
+Sadly takes a while for long fragments...
+\end{frame}
+
+%% Python script, what do I plot?
+\begin{frame}
+\frametitle{Metainformation paths} 
+We can do some nice things with the metainformation, I wrote a script that:
+\begin{itemize}
+\item Finds the average path length
+\item Finds the number of decorrelated groups of paths
+\item Ratio of FW:BW shooting moves
+\item Draws a tree of all shooting moves
+\end{itemize}
+The tree is not extremely pretty though, better to do in OPS probably...
+\end{frame}
+
+%%% Example 1
+\section{Example: alanine dipeptide} 
+\setcounter{subsection}{1}
+
+%% Introduce the molecules
+\begin{frame}
+\frametitle{Alanine Dipeptide} 
+Fast
+\end{frame}
+
+\begin{frame}
+\frametitle{Alanine Dipeptide} 
+PICTURE
+\end{frame}
+
+%% Describe the steps in the tutorial
+\begin{frame}
+\frametitle{Preparing for \textsc{TIPSI}} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Running \textsc{TIPSI}} 
+
+Appended the bashscript to the end of the job
+\end{frame}
+
+\begin{frame}
+\frametitle{Running \textsc{TIPSI}} 
+
+Print PARfile
+
+\end{frame}
+
+%% Describe the analysis steps
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%%% Example 2
+\section{Example: DNA baseroll}
+\setcounter{subsection}{1}
+
+%% Introduce what happens 
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%% Describe the steps in the tutorial
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%% Describe the analysis steps
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%%% Appendices
+\section{Appendices}
+\setcounter{subsection}{1}
+
+% Linux and GROMACS not very interesting, but included a guide to very basic parameter files
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+% Problem: non-inclusive of everything, there are probably more options I did not need and had no chance to explore
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%%% Summary
+\section{Summary}
+\subsection{Test}
+
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+%% Final slide: I will leave it here, but the project is on GIT and addition can be made
+\subsection{Future work}
+\begin{frame}
+\frametitle{Introduction} 
+\end{frame}
+
+\end{document}

@@ -10,21 +10,6 @@
 \setlength\parindent{15pt}
 \lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
 
-% https://www.dropbox.com/s/5erwtsptqm2im82/log-DNAbaserolling.pdf?dl=0
-% does it need more math?
-% dag vrijmaken opschonen git en alle files doorgaan
-% presentation
-% how do I run tipsi longer?
-% inspect all submit files in the tutorial
-% make readme nice, inclue contact info
-% executables in bin, bit more discussion dnabr results
-% dnabr minimaal
-% voorbeeldoutput, alleen de kleine files, alleen top nodig
-% GMXLIB
-% genereer tpr zelf, verander timestep naar de juiste, oude verwijderen
-% vermeld compilen kan lang duren bij een lang sourcetrajectory
-% genereer een korter sourcetraj
-
 \begin{document}
 
 \section*{Transition Path Sampling}
@@ -169,6 +154,9 @@ LAGE TEMP TOCH WEL, MAAR KORT, 10 nanosec, is het echt stabiel?
 
 \subsubsection*{Running TIPSI}
 
+% inspect all submit files in the tutorial
+% vermeld compilen kan lang duren bij een lang sourcetrajectory
+
 To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of ome collective variable. In this example, we use the radius of gyration and the dihedral angle over atoms (5, 7, 9, 15).
 
 NOTE: applied -1 here to run in TIPSI
@@ -261,7 +249,17 @@ If you feel brave, you can check if there were no warnings or errors by opening 
 % TODO: Analyze if they are decorrelated
 % TODO: Calculate average pathlength
 
-% TODO: MAYBE OPS
+
+
+Identify	where	the	transition	takes	place	from	A	to	B.	
+This	data	was	generated	using	TPS	in	the	one-way	shooting	mode.	This	means	
+that	first	a	random	frame	was	selected	from	which	to	start	a	new	MD	run.	This	
+MD	run	can	go	either	forward	to	state	B,	or	backward,	to	state	A.	Going	backward	
+is	achieved	by	multiplying	the	velocities	with	-1.	Whether	the	MD	simulation	
+goes	backward	or	forward	is	randomly	decided.	As	a	result,	a	new	reactive	
+trajectory	then	consists	of	a	part	that	is	generated	in	the	new	MD	simulation,	and	
+a	part	that	is	kept	from	the	previous	trajectory.	
+
 
 \newpage
 
@@ -270,6 +268,8 @@ If you feel brave, you can check if there were no warnings or errors by opening 
 (Short introduction with picture)
 
 \subsubsection*{Preparatory Analysis}
+
+% GMXLIB
 
 We again log into the Carbon cluster. Make sure you are connected to the UvA network or VPN, and enter
 %
@@ -296,6 +296,8 @@ qsub submit\_md
 \end{lstlisting}
 %
 The output will be put in the \texttt{\textcolor{blue}{output}} directory.
+
+% genereer tpr zelf, verander timestep naar de juiste, oude verwijderen
 
 \subsubsection*{Running TIPSI}
 
