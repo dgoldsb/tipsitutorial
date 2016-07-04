@@ -3,6 +3,7 @@
 \usetheme{Frankfurt}
 \usepackage{natbib}
 \usepackage{apalike}
+\usepackage{graphicx}
 \usepackage{listings}
 \lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
 
@@ -24,7 +25,7 @@
 
 %% General starting slide
 \section{Introduction} 
-\subsection{Project summary}
+\setcounter{subsection}{1}
 %% Who am I and what did I do?
 \begin{frame}
 \frametitle{Introduction}
@@ -32,7 +33,7 @@ Who am I?
 \begin{itemize}
 \item Student at the computational science master
 \item Attended the course on biomolecular simulation
-\item Enjoyed figuring out \textsc{TIPSI}
+\item Enjoyed figuring out \textsc{TIPSI} in class
 \item Did a project to write a tutorial that introduces \textsc{TIPSI} over the past months!
 \end{itemize}
 \end{frame}
@@ -51,14 +52,24 @@ In this presentation I will:
 
 %% What is TPS again?
 %% Likely preaching to the coir, so keep it at 5 slides
-\subsection{TPS recap}
 \begin{frame}
 \frametitle{What is TPS again?} 
 \end{frame}
 
 \begin{frame}
-\frametitle{What is TPS again?} 
-IMAGE
+\frametitle{What is TPS again?}
+\textbf{Acceptor probability}:
+\begin{center}
+\includegraphics[scale=0.4]{images/bolhuis1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{What is TPS again?}
+\textbf{Shooting move}:
+\begin{center}
+\includegraphics[scale=0.5]{images/bolhuis2.png}
+\end{center}
 \end{frame}
 
 %% What is TIPSI?
@@ -82,7 +93,7 @@ IMAGE
 
 %%% What did I write?
 \section{Contributions}
-\subsection{Test}
+\setcounter{subsection}{1}
 
 %% xvg reading and plotting
 %% Bash to compile paths, was a bitch
@@ -95,6 +106,7 @@ I made several minor contributions to this project:
 \item Python script to analyze the paths
 \item Tutorial with a Python tool
 \end{itemize}
+Resulted in some surprises that had to be dealt with...
 \end{frame}
 
 %% Bash in more detail, how does this work?
@@ -137,6 +149,13 @@ We can do some nice things with the metainformation, I wrote a script that:
 The tree is not extremely pretty though, better to do in OPS probably...
 \end{frame}
 
+\begin{frame}
+\frametitle{Metainformation paths} 
+\begin{center}
+\includegraphics[scale=1]{images/tree.png}
+\end{center}
+\end{frame}
+
 %%% Example 1
 \section{Example: alanine dipeptide} 
 \setcounter{subsection}{1}
@@ -144,23 +163,40 @@ The tree is not extremely pretty though, better to do in OPS probably...
 %% Introduce the molecules
 \begin{frame}
 \frametitle{Alanine Dipeptide} 
-Fast
+Our first example is \textbf{alanine dipeptide}:
+\begin{itemize}
+\item Extremely fast to run
+\item Very simple to understand, with simple order parameters (dihedrals)
+\item Common example to use
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Alanine Dipeptide} 
-PICTURE
+\begin{center}
+\includegraphics[scale=0.4]{images/alanine.png}
+\end{center}
 \end{frame}
 
 %% Describe the steps in the tutorial
 \begin{frame}
 \frametitle{Preparing for \textsc{TIPSI}} 
+In this example we do everything from scratch:
+\begin{itemize}
+\item Start with \texttt{pdb}-file and MD settings
+\item We prepare make a periodic system with a solvent
+\item We do energy minimization followed by a constrained MD run
+\item We do runs at room temperature and high temperature
+\end{itemize}
+We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
 \end{frame}
 
 \begin{frame}
 \frametitle{Running \textsc{TIPSI}} 
 
-Appended the bashscript to the end of the job
+TIPSI steps I take.
+
+I appended the bashscript to the end of the job, so that it puts all paths and the metadata in the \texttt{output/DATA} directory.
 \end{frame}
 
 \begin{frame}
@@ -172,7 +208,10 @@ Print PARfile
 
 %% Describe the analysis steps
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Analyzing \textsc{TIPSI}}
+INSERT
+
+(Example in VMD.) 
 \end{frame}
 
 %%% Example 2
@@ -180,18 +219,44 @@ Print PARfile
 \setcounter{subsection}{1}
 
 %% Introduce what happens 
+
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{DNA baseroll} 
+Second example is the DNA baseroll:
+\begin{itemize}
+\item Project by Jocelyne Vreede and David Swenson
+\item Concerns the transition from the WC- to the HG-pairing
+\item Metadynamics simulation has been done, so there is a trajectory
+\end{itemize}
+MORE INFORMATION
+\end{frame}
+
+\begin{frame}
+\frametitle{DNA baseroll} 
+\begin{center}
+\includegraphics[scale=0.2]{images/pairing.png}
+\end{center}
 \end{frame}
 
 %% Describe the steps in the tutorial
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Preparing for \textsc{TIPSI}} 
+In this example we start with a trajectory and state definitions:
+\begin{itemize}
+\item We import the custom topology
+\item We create a \texttt{tpr}-file to suit our MD-needs
+\item We set up a parameter file that include the state definitions (H-bonds)
+\item We run \textsc{tipsi} with this \texttt{tpr} and the provided trajectory
+\end{itemize}
+We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
 \end{frame}
 
 %% Describe the analysis steps
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Analyzing \textsc{TIPSI}}
+INSERT
+
+(Example in VMD.) 
 \end{frame}
 
 %%% Appendices
@@ -200,26 +265,63 @@ Print PARfile
 
 % Linux and GROMACS not very interesting, but included a guide to very basic parameter files
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Cheatsheets}
+As an appendix, I included:
+\begin{itemize}
+\item A Linux cheatsheet, for students who are unfamiliar
+\item A \textsc{gromacs} cheatsheet (which I caught myself use often too)
+\item A \textsc{tipsi} cheatsheet
+\end{itemize}
+The last adresses the documentation problem with \textsc{tipsi}.
 \end{frame}
 
 % Problem: non-inclusive of everything, there are probably more options I did not need and had no chance to explore
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Cheatsheets}
+\textsc{tipsi} cheatsheet includes:
+\begin{itemize}
+\item How to set up a parameter file
+\item All calculator options
+\item Several ways to define groups of atoms
+\begin{itemize}
+\item Numpy arrays
+\item Groups from \textsc{gromacs} \texttt{ndx}-files
+\end{itemize}
+\end{itemize}
+There are \textbf{indexing problems}...
+\end{frame}
+
+\begin{frame}
+\frametitle{Cheatsheets}
+\begin{center}
+\includegraphics[scale=4]{images/donald_knuth.png}
+\end{center}
 \end{frame}
 
 %%% Summary
 \section{Summary}
-\subsection{Test}
+\setcounter{subsection}{1}
 
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Summary} 
+\begin{itemize}
+\item I wrote a tutorial for students/people interested in \textsc{tipsi} with a fast and uninteresting example, and a more computationally demanding but actually interesting example
+\item Added a bash script that finishes the output to make it fit for further analysis
+\item Added a basic script that helps understand the shooting moves made
+\item Compiled all calculator options, and how to set up a parameter file for \textsc{tipsi}
+\end{itemize}
 \end{frame}
 
 %% Final slide: I will leave it here, but the project is on GIT and addition can be made
-\subsection{Future work}
 \begin{frame}
-\frametitle{Introduction} 
+\frametitle{Future changes?}
+There might be some things to change down the line:
+\begin{itemize}
+\item Include OPS as an analysis tool (no time now, and still being developed)
+\item Append to the possibilities in the parameter file (non-calculator options)
+\item Any other changes...
+\end{itemize} 
+The project is on GIT and should be public: \url{https://github.com/dgoldsb/tipsitutorial.git}
 \end{frame}
 
 \end{document}
