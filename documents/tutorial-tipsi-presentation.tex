@@ -50,10 +50,28 @@ In this presentation I will:
 \end{itemize} 
 \end{frame}
 
+\begin{frame}
+\frametitle{What is TPS again?}
+\textbf{Find trajectories of rare transitions}:
+\begin{center}
+\includegraphics[scale=0.3]{images/fold.png}
+\end{center}
+\end{frame}
+
 %% What is TPS again?
 %% Likely preaching to the coir, so keep it at 5 slides
 \begin{frame}
-\frametitle{What is TPS again?} 
+\frametitle{What is TPS again?}
+Algorithm:
+\begin{itemize}
+\item Take existing path
+\item Choose random time slice t
+\item Change momenta slightly at t
+\item Integrate forward and backward in time to create new path of length L
+\item Accept if A and B are connected, otherwise reject and retain old path
+\item Calculate averages
+\end{itemize}
+Assumes the two states are truly stable!
 \end{frame}
 
 \begin{frame}
@@ -149,13 +167,6 @@ We can do some nice things with the metainformation, I wrote a script that:
 The tree is not extremely pretty though, better to do in OPS probably...
 \end{frame}
 
-\begin{frame}
-\frametitle{Metainformation paths} 
-\begin{center}
-\includegraphics[scale=1]{images/tree.png}
-\end{center}
-\end{frame}
-
 %%% Example 1
 \section{Example: alanine dipeptide} 
 \setcounter{subsection}{1}
@@ -192,26 +203,50 @@ We look at the order parameters in the run using a Python script and \textsc{Gro
 \end{frame}
 
 \begin{frame}
+\frametitle{Defining the stable states} 
+\begin{center}
+\includegraphics[scale=0.4]{images/C_2D.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
 \frametitle{Running \textsc{TIPSI}} 
 
-TIPSI steps I take.
+\begin{lstlisting}
+maxframes  = 2000
 
-I appended the bashscript to the end of the job, so that it puts all paths and the metadata in the \texttt{output/DATA} directory.
+par dh1  = dihdeg(frame$Dihedral1)
+par dh2  = dihdeg(frame$Dihedral2)
+
+state A = (-150 < dh1 & dh1 < -50 
+	& 120 < dh2 & dh2 < 180)
+state B = (-100 < dh1 & dh1 < -50 
+	& -50 < dh2 & dh2 < 20)
+
+interface I = (!A) & (!B)
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
-\frametitle{Running \textsc{TIPSI}} 
+\frametitle{Analyzing \textsc{TIPSI}} 
 
-Print PARfile
+I appended the bashscript to the end of the job, so that it puts all paths and the metadata in the \texttt{output/DATA} directory, now we can take a look at the trajectory in VMD! 
+
+We find that:
+
+\begin{itemize}
+\item Average length is 136.4 frames
+\item FW/BW ratio is 0.4
+\item Number of decorrelated groups of paths is 2
+\end{itemize}
 
 \end{frame}
 
-%% Describe the analysis steps
 \begin{frame}
-\frametitle{Analyzing \textsc{TIPSI}}
-INSERT
-
-(Example in VMD.) 
+\frametitle{Analyzing \textsc{TIPSI}} 
+\begin{center}
+\includegraphics[scale=1]{images/tree.png}
+\end{center}
 \end{frame}
 
 %%% Example 2
@@ -226,9 +261,9 @@ Second example is the DNA baseroll:
 \begin{itemize}
 \item Project by Jocelyne Vreede and David Swenson
 \item Concerns the transition from the WC- to the HG-pairing
-\item Metadynamics simulation has been done, so there is a trajectory
+\item An actual rare event
 \end{itemize}
-MORE INFORMATION
+Metadynamics simulation has been done, so there is a trajectory available that contains the transition!
 \end{frame}
 
 \begin{frame}
@@ -254,9 +289,9 @@ We look at the order parameters in the run using a Python script and \textsc{Gro
 %% Describe the analysis steps
 \begin{frame}
 \frametitle{Analyzing \textsc{TIPSI}}
-INSERT
 
-(Example in VMD.) 
+(Same slide as with dipeptala, when carbon is up again...)
+
 \end{frame}
 
 %%% Appendices
@@ -292,7 +327,21 @@ There are \textbf{indexing problems}...
 \end{frame}
 
 \begin{frame}
-\frametitle{Cheatsheets}
+\frametitle{Running \textsc{TIPSI}} 
+Calculator options are:
+\begin{itemize}
+\item \texttt{com}: center of mass
+\item \texttt{dist}: distance (several options)
+\item \texttt{angle}: angle of 3 atoms
+\item \texttt{dihrad}/\texttt{dihdeg}: dihedral in rads/degrees
+\item \texttt{rgyr}: radius of gyration, incompatible with \textsc{gromacs}
+\item \texttt{rmsd}: root-mean-square-deviation
+\item \texttt{hbonds}: number of hydrogen bonds, specific or non-specific
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Relevant XKCD}
 \begin{center}
 \includegraphics[scale=4]{images/donald_knuth.png}
 \end{center}
