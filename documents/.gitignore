@@ -3,3 +3,9 @@
 *.blg
 *.bbl
 *.log
+*.aux
+*.vrb
+*.toc
+*.snm
+*.out
+*.nav
