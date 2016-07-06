@@ -116,8 +116,6 @@ Accepted if state \textit{A} or \textit{B} is reached.\\
 \end{frame}
 
 %%% What did I write?
-\section{Contributions}
-\setcounter{subsection}{1}
 
 %% xvg reading and plotting
 %% Bash to compile paths, was a bitch
@@ -132,6 +130,81 @@ I made several minor contributions to this project:
 \end{itemize}
 Resulted in some surprises that had to be dealt with...
 \end{frame}
+
+%%% Example 1
+\section{Example: alanine dipeptide} 
+\setcounter{subsection}{1}
+
+%% Introduce the molecules
+\begin{frame}
+\frametitle{Alanine Dipeptide} 
+Our first example is \textbf{alanine dipeptide}:
+\begin{itemize}
+\item Extremely fast to run
+\item Very simple to understand, with simple order parameters (dihedrals)
+\item Has a nice transition between two distinct states
+\item Common example to use
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Alanine Dipeptide} 
+\begin{center}
+\includegraphics[scale=0.4]{images/alanine.png}
+\end{center}
+\end{frame}
+
+%% Describe the steps in the tutorial
+\begin{frame}
+\frametitle{Preparing for \textsc{TIPSI}} 
+In this example we do everything from scratch:
+\begin{itemize}
+\item Start with \texttt{pdb}-file (defines the structure) and MD settings
+\item We prepare make a periodic system with a solvent
+\item We do energy minimization followed by a constrained MD run
+\item We do runs at room temperature and high temperature
+\end{itemize}
+We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
+\end{frame}
+
+\begin{frame}
+\frametitle{Defining the stable states} 
+\begin{figure}[t!]
+    \begin{subfigure}[t]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{images/C_Dihedral1.pdf}
+    \end{subfigure}%
+    \begin{subfigure}[t]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{images/C_Dihedral2.pdf}
+    \end{subfigure}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Defining the stable states} 
+\begin{center}
+\includegraphics[scale=0.4]{images/C_2D.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Running \textsc{TIPSI}}
+\begin{lstlisting}
+maxframes  = 2000
+
+par dh1  = dihdeg(frame$Dihedral1)
+par dh2  = dihdeg(frame$Dihedral2)
+
+state A = (-150 < dh1 & dh1 < -50 
+	& 120 < dh2 & dh2 < 180)
+state B = (-100 < dh1 & dh1 < -50 
+	& -50 < dh2 & dh2 < 20)
+
+interface I = (!A) & (!B)
+\end{lstlisting}
+\end{frame}
+
+\section{Processing \textsc{tipsi} output}
+\setcounter{subsection}{1}
 
 %% Bash in more detail, how does this work?
 \begin{frame}
@@ -207,78 +280,6 @@ We can do some nice things with the metainformation, I wrote a script that:
 \end{itemize}
 \end{frame}
 
-%%% Example 1
-\section{Example: alanine dipeptide} 
-\setcounter{subsection}{1}
-
-%% Introduce the molecules
-\begin{frame}
-\frametitle{Alanine Dipeptide} 
-Our first example is \textbf{alanine dipeptide}:
-\begin{itemize}
-\item Extremely fast to run
-\item Very simple to understand, with simple order parameters (dihedrals)
-\item Has a nice transition between two distinct states
-\item Common example to use
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Alanine Dipeptide} 
-\begin{center}
-\includegraphics[scale=0.4]{images/alanine.png}
-\end{center}
-\end{frame}
-
-%% Describe the steps in the tutorial
-\begin{frame}
-\frametitle{Preparing for \textsc{TIPSI}} 
-In this example we do everything from scratch:
-\begin{itemize}
-\item Start with \texttt{pdb}-file (defines the structure) and MD settings
-\item We prepare make a periodic system with a solvent
-\item We do energy minimization followed by a constrained MD run
-\item We do runs at room temperature and high temperature
-\end{itemize}
-We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
-\end{frame}
-
-\begin{frame}
-\frametitle{Defining the stable states} 
-\begin{figure}[t!]
-    \begin{subfigure}[t]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{images/C_Dihedral1.pdf}
-    \end{subfigure}%
-    \begin{subfigure}[t]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{images/C_Dihedral2.pdf}
-    \end{subfigure}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\frametitle{Defining the stable states} 
-\begin{center}
-\includegraphics[scale=0.4]{images/C_2D.pdf}
-\end{center}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Running \textsc{TIPSI}}
-\begin{lstlisting}
-maxframes  = 2000
-
-par dh1  = dihdeg(frame$Dihedral1)
-par dh2  = dihdeg(frame$Dihedral2)
-
-state A = (-150 < dh1 & dh1 < -50 
-	& 120 < dh2 & dh2 < 180)
-state B = (-100 < dh1 & dh1 < -50 
-	& -50 < dh2 & dh2 < 20)
-
-interface I = (!A) & (!B)
-\end{lstlisting}
-\end{frame}
-
 \begin{frame}
 \frametitle{Analyzing \textsc{TIPSI}} 
 
@@ -299,6 +300,7 @@ We find that:
 \begin{center}
 \includegraphics[scale=1]{images/tree.png}
 \end{center}
+We visualize path 9 in VMD.
 \end{frame}
 
 %%% Example 2
@@ -342,8 +344,22 @@ We look at the order parameters in the run using a Python script and \textsc{Gro
 \begin{frame}
 \frametitle{Analyzing \textsc{TIPSI}}
 
-(Same slide as with dipeptala, when carbon is up again...)
+We find that:
 
+\begin{itemize}
+\item Average length is 723.88 frames
+\item FW/BW ratio is 0.33
+\item Number of decorrelated groups of paths is 1
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Analyzing \textsc{TIPSI}} 
+Not very balanced tree:
+\begin{center}
+\includegraphics[scale=0.2]{images/tree_dnabr.png}
+\end{center}
+We visualize path 9 in VMD.
 \end{frame}
 
 %%% Appendices
