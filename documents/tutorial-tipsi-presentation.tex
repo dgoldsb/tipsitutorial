@@ -5,6 +5,8 @@
 \usepackage{apalike}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
 \lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
 
 \title{A Tutorial for \textsc{TIPSI}, and How to Assemble Paths}
@@ -31,6 +33,7 @@
 \frametitle{Introduction}
 Who am I?
 \begin{itemize}
+\item Dylan Goldsborough
 \item Student at the computational science master
 \item Attended the course on biomolecular simulation
 \item Enjoyed figuring out \textsc{TIPSI} in class
@@ -40,7 +43,7 @@ Who am I?
 
 %% Structure
 \begin{frame}
-\frametitle{Structure}
+\frametitle{Outline}
 In this presentation I will:
 \begin{itemize}
 \item Give a brief recap of TPS
@@ -51,43 +54,46 @@ In this presentation I will:
 \end{frame}
 
 \begin{frame}
-\frametitle{What is TPS again?}
+\frametitle{What is TPS?}
 \textbf{Find trajectories of rare transitions}:
 \begin{center}
 \includegraphics[scale=0.3]{images/fold.png}
 \end{center}
+(Chung and Eaton, 2013)
 \end{frame}
 
 %% What is TPS again?
 %% Likely preaching to the coir, so keep it at 5 slides
 \begin{frame}
-\frametitle{What is TPS again?}
+\frametitle{What is TPS?}
 Algorithm:
 \begin{itemize}
 \item Take existing path
-\item Choose random time slice t
-\item Change momenta slightly at t
-\item Integrate forward and backward in time to create new path of length L
-\item Accept if A and B are connected, otherwise reject and retain old path
-\item Calculate averages
+\item Choose random time slice \textit{t}
+\item Change momenta slightly at \textit{t}
+\item Integrate forward or backward in time to create new path
+\item Accept if state \textit{A} or \textit{B} is reached, otherwise reject and retain old path
 \end{itemize}
-Assumes the two states are truly stable!
+\textbf{Important}: we assume that both states are stable, and that we have a transition trajectory ready!
 \end{frame}
 
 \begin{frame}
-\frametitle{What is TPS again?}
-\textbf{Acceptor probability}:
+\frametitle{What is TPS?}
+\textbf{Committor probability}:
 \begin{center}
 \includegraphics[scale=0.4]{images/bolhuis1.png}
 \end{center}
+(Bolhuis, 2002)
 \end{frame}
 
 \begin{frame}
-\frametitle{What is TPS again?}
+\frametitle{What is TPS?}
 \textbf{Shooting move}:
 \begin{center}
 \includegraphics[scale=0.5]{images/bolhuis2.png}
 \end{center}
+Accepted if state \textit{A} or \textit{B} is reached.\\
+(Bolhuis, 2002)
 \end{frame}
 
 %% What is TIPSI?
@@ -100,10 +106,10 @@ Assumes the two states are truly stable!
 \frametitle{What is \textsc{TIPSI}?} 
 \textsc{TIPSI} is a script by Tsjerk Wassenaar, which:
 \begin{itemize}
-\item Adaptation of a Perl script
+\item Adaptation of a Perl script by Jarek Juraszek
 \item Written in Python
-\item It relies on \textsc{GROMACS} version 4.5.4
-\item Does random shooting moves forwards and backwards
+\item It relies on \textsc{GROMACS} version 4.5.4 (a molecular dynamics engine)
+\item Does random shooting moves forward and backward
 \item Reverses time for backward shooting
 \item A "molecular calculator"
 \end{itemize}
@@ -130,6 +136,7 @@ Resulted in some surprises that had to be dealt with...
 %% Bash in more detail, how does this work?
 \begin{frame}
 \frametitle{Assembling paths}
+\textsc{Tipsi} only saves the shooting moves to save space, so to view and analyze the transitions we need to assemble them.\\
 \textbf{The problem}: 
 \begin{itemize}
 \item \textsc{TIPSI} outputs shooting moves only
@@ -138,6 +145,40 @@ Resulted in some surprises that had to be dealt with...
 \item Negative timestamps
 \end{itemize}
 \textbf{Result}: assembling the paths is a minor nightmare...
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\textsc{TIPSI} output}
+\textbf{Example of \textsc{Tipsi output}}:
+\begin{lstlisting}
+DIR: tipsi-tutorial/output/jobname/DATA/9/1
+
+9-1-BW.cpt  9-1-BW.out  9-1-BW.xtc  DONE
+9-1-BW.dat  9-1-BW.top  9-1.dat     md-prod.mdp
+9-1-BW.edr  9-1-BW.tpr  ACCEPTED    PARENT
+9-1-BW.err  9-1-BW.trr  CMD         parent.dat
+\end{lstlisting}
+%\begin{center}
+%\includegraphics[scale=0.4]{images/outputfiles.png}
+%\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\textsc{TIPSI} output}
+\begin{lstlisting}
+REGEX: '[A-I]\s+(\S+)\s+[F-T][a-z]+\s+(\S+)\s+'
+
+state   time    stop    file
+A       -1325.0 True    ../../9/1/9-1-BW.trr
+I       -1305.0 False   ../../9/1/9-1-BW.trr
+I       -1285.0 False   ../../9/1/9-1-BW.trr
+I       -1265.0 False   ../../9/1/9-1-BW.trr
+...
+I       465.0   False   ../../6/4/6-4-FW.trr
+I       485.0   False   ../../6/4/6-4-FW.trr
+I       505.0   False   ../../6/4/6-4-FW.trr
+B       525.0   True    ../../6/4/6-4-FW.trr
+\end{lstlisting}
 \end{frame}
 
 %% Mention that GROMACS does not like negative times...
@@ -151,7 +192,7 @@ Resulted in some surprises that had to be dealt with...
 \item Creates each path by dumping and appending single frames
 \item Stores some metainformation in a \texttt{csv}-file
 \end{itemize}
-Sadly takes a while for long fragments...
+Takes a while to dump frames for long trajectories...
 \end{frame}
 
 %% Python script, what do I plot?
@@ -164,7 +205,6 @@ We can do some nice things with the metainformation, I wrote a script that:
 \item Ratio of FW:BW shooting moves
 \item Draws a tree of all shooting moves
 \end{itemize}
-The tree is not extremely pretty though, better to do in OPS probably...
 \end{frame}
 
 %%% Example 1
@@ -178,6 +218,7 @@ Our first example is \textbf{alanine dipeptide}:
 \begin{itemize}
 \item Extremely fast to run
 \item Very simple to understand, with simple order parameters (dihedrals)
+\item Has a nice transition between two distinct states
 \item Common example to use
 \end{itemize}
 \end{frame}
@@ -194,12 +235,24 @@ Our first example is \textbf{alanine dipeptide}:
 \frametitle{Preparing for \textsc{TIPSI}} 
 In this example we do everything from scratch:
 \begin{itemize}
-\item Start with \texttt{pdb}-file and MD settings
+\item Start with \texttt{pdb}-file (defines the structure) and MD settings
 \item We prepare make a periodic system with a solvent
 \item We do energy minimization followed by a constrained MD run
 \item We do runs at room temperature and high temperature
 \end{itemize}
 We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
+\end{frame}
+
+\begin{frame}
+\frametitle{Defining the stable states} 
+\begin{figure}[t!]
+    \begin{subfigure}[t]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{images/C_Dihedral1.pdf}
+    \end{subfigure}%
+    \begin{subfigure}[t]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{images/C_Dihedral2.pdf}
+    \end{subfigure}
+\end{figure}
 \end{frame}
 
 \begin{frame}
@@ -210,8 +263,7 @@ We look at the order parameters in the run using a Python script and \textsc{Gro
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Running \textsc{TIPSI}} 
-
+\frametitle{Running \textsc{TIPSI}}
 \begin{lstlisting}
 maxframes  = 2000
 
@@ -261,7 +313,7 @@ Second example is the DNA baseroll:
 \begin{itemize}
 \item Project by Jocelyne Vreede and David Swenson
 \item Concerns the transition from the WC- to the HG-pairing
-\item An actual rare event
+\item An actual rare event (microsecond range), unlike example 1
 \end{itemize}
 Metadynamics simulation has been done, so there is a trajectory available that contains the transition!
 \end{frame}
@@ -279,7 +331,7 @@ Metadynamics simulation has been done, so there is a trajectory available that c
 In this example we start with a trajectory and state definitions:
 \begin{itemize}
 \item We import the custom topology
-\item We create a \texttt{tpr}-file to suit our MD-needs
+\item We create a \texttt{tpr}-file (containing the simulation settings) to suit our MD-needs
 \item We set up a parameter file that include the state definitions (H-bonds)
 \item We run \textsc{tipsi} with this \texttt{tpr} and the provided trajectory
 \end{itemize}
@@ -320,10 +372,17 @@ The last adresses the documentation problem with \textsc{tipsi}.
 \item Several ways to define groups of atoms
 \begin{itemize}
 \item Numpy arrays
-\item Groups from \textsc{gromacs} \texttt{ndx}-files
+\item Groups from \textsc{gromacs} \texttt{ndx}-files (defines groups of atoms by their number)
 \end{itemize}
 \end{itemize}
 There are \textbf{indexing problems}...
+\end{frame}
+
+\begin{frame}
+\frametitle{Relevant XKCD}
+\begin{center}
+\includegraphics[scale=4]{images/donald_knuth.png}
+\end{center}
 \end{frame}
 
 \begin{frame}
@@ -338,13 +397,6 @@ Calculator options are:
 \item \texttt{rmsd}: root-mean-square-deviation
 \item \texttt{hbonds}: number of hydrogen bonds, specific or non-specific
 \end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Relevant XKCD}
-\begin{center}
-\includegraphics[scale=4]{images/donald_knuth.png}
-\end{center}
 \end{frame}
 
 %%% Summary
