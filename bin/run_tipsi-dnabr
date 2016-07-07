@@ -1,2 +1,2 @@
 export MDRUN="/usr/mpi/intel/openmpi-1.4.5/bin/mpirun /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f"
-./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps-dnabr.par -ndx index-dnabr.ndx -maxc 20 -np 16 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "$MDRUN"
+./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps-dnabr.par -maxc 20 -np 16 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "$MDRUN"

@@ -4,6 +4,7 @@
 import sys
 import re
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -121,14 +122,12 @@ p1 = plt.plot(var1)
 plt.xlabel('Timesteps')
 plt.ylabel(xlab)
 plt.savefig(outfilename+'_'+xlab+'.pdf')
-plt.show()
 
 p2 = plt.plot(var2)
 plt.plot(var2)
 plt.xlabel('Timesteps')
 plt.ylabel(ylab)
 plt.savefig(outfilename+'_'+ylab+'.pdf')
-plt.show()
 
 ##### 2D Plotting ##########
 
@@ -147,9 +146,8 @@ for i in range(0, len(var1)):
                 bins[j, k] += 1
 
 # Loop is over, we can plot the bins
-p3 = plt.imshow(bins, interpolation = "none", extent = [minv2, maxv2, maxv1, minv1], aspect = 'auto')
+p3 = plt.imshow(bins, interpolation = 'nearest', extent = [minv2, maxv2, maxv1, minv1], aspect = 'auto')
 plt.colorbar()
 plt.xlabel(ylab)
 plt.ylabel(xlab)
 plt.savefig(outfilename+'_2D.pdf')
-plt.show()

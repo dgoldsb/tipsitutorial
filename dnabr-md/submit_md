@@ -2,11 +2,11 @@
 # Parallel script for Grid Engine on Carbon
 #$ -S /bin/bash
 #$ -N dnabaseroll-MD
-#$ -q bio3
+#$ -q parallel
 #$ -V
 #$ -cwd
 #$ -notify
-#$ -pe orte 16
+#$ -pe orte 8
 
 # the full-executable name
 EXECUTABLE=/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f

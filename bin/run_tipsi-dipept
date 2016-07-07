@@ -1,2 +1,2 @@
 export MDRUN="/usr/mpi/intel/openmpi-1.4.5/bin/mpirun /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f"
-./tipsi/tipsi.sh -v -tpr lowT.tpr -trr highT.trr -par tps-dipept.par -ndx index-par-1indexed.ndx -maxc 10 -np 8 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "$MDRUN"
+./tipsi/tipsi.sh -v -tpr md.tpr -trr highT.trr -par tps-dipept.par -ndx angle.ndx -maxc 10 -np 8 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "$MDRUN"

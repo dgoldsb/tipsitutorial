@@ -1,7 +1,7 @@
 maxframes  = 2000
 
-par dh1  = dihdeg(frame$Dihedral1)
-par dh2  = dihdeg(frame$Dihedral2)
+par dh1  = dihdeg(frame$Phi)
+par dh2  = dihdeg(frame$Psi)
 
 state A = (-150 < dh1 & dh1 < -50 & 120 < dh2 & dh2 < 180)
 state B = (-100 < dh1 & dh1 < -50 & -50 < dh2 & dh2 < 20)

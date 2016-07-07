@@ -1,6 +1,7 @@
 \documentclass[]{article}
 
 \usepackage{color}
+\usepackage{graphicx}
 \usepackage{listings}
 \usepackage[tmargin=1in,bmargin=1in,lmargin=1.25in,rmargin=1.25in]{geometry}
 \usepackage{titlesec}
@@ -16,27 +17,29 @@
 
 \subsection*{Introduction}
 
-Consider a system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) techniques to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a timescale of milliseconds, for instance. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
+Consider a molecular system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) methods to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a timescale of milliseconds, for instance. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
 
-If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones quickly after. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
+% Acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
+If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. If the shooting move is unsuccessful, it is rejected, and a new shooting move is performed. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
 
-% TODO: picture from slides Jocelyne
+In this tutorial the useage of the \textsc{TIPSI} package (version 0.1) is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns dipeptide alanine, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is actually a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
 
-% TODO: acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
-
-In this tutorial the useage of the \textsc{TIPSI} package (version 0.1) is demonstrated. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns dipeptide alanine, and samples a transition between its two conformations. The second example concerns a transition which is actually a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing (Fig.~\ref{Hoogsteen}). This example uses a provided result of a metadynamics simulation as input. 
-
-\textsc{TIPSI} relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. \textsc{Git} is required to pull the repository with the demonstration files. For visualizing structures, the VMD package is recommended. This tutorial is written assuming you work on a Linux system. We assume some knowledge in working with Linux, as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial. Finally, it is assumed you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
-% TODO: Stukje over hoe het opgezet is naast het protocol, welk field en alles.
-Both use the \texttt{TIP3P} water model. The forcefield used in the first tutorial is the \texttt{AMBER99SBILDN}, the send uses another \texttt{AMBER} forcefield included in the repository. Periodic dodecahedron box with 1nm distance between the wall and the peptide. Uses 100mM NaCl solution. We do an em run, add salt, do an em again, then a posre run. 50000/0.002 steps of dt 0.002.
+\textsc{TIPSI} relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. For this tutorial, \textsc{git} is required to pull the repository with the demonstration files. For visualizing structures, the VMD package is recommended. This tutorial is written assuming you work on a Linux system. We assume some knowledge in working with Linux, as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial for those less familiar with either. Finally, it is assumed you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
+% Stukje over hoe het opgezet is naast het protocol, welk field en alles.
+Both use the \texttt{TIP3P} water model. The forcefield used in the first tutorial is the \texttt{AMBER99SBILDN}, the send uses another \texttt{AMBER} forcefield included in the repository.
 
 \subsection*{Dipeptide Alanine}
 
-(Short introduction and image.)
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/alanine.png}
+    \caption{Alanine dipeptide, dihedrals labeled $\phi$ and $\psi$.}
+    \label{fig:alanine}
+\end{figure}
+
+Alanine dipeptide is a small organic molecule, consisting of the alanine amino acid with two minimal peptide bonds. This molecule has two stable states, defined by the configuration of the dihedral angles $\phi$ and $\psi$ (Fig.~\ref{fig:alanine}). In this first part of the tutorial, we will generate transition paths between the two states using \textsc{Tipsi}. To run an analysis \textsc{TIPSI}, we need to supply an intial trajectory to \textsc{TIPSI} in which the transition takes place at least once. We also need to define the stable states between which the transition takes place in a quantitative way. To get an initial trajectory, we do a preparatory MD analysis of the molecular system first.
 
 \subsubsection*{Preparatory Analysis}
-
-To run an analysis \textsc{TIPSI}, we need to supply an intial trajectory to \textsc{TIPSI} in which the transition takes place at least once. We also need to define the stable states between which the transition takes place in a quantitative way. To get an initial trajectory, we do a MD simulation of the molecular system first.
 
 First, we log into the Carbon cluster. Make sure you are connected to the UvA network or VPN, and enter
 %
@@ -47,26 +50,27 @@ ssh user@carbon.science.uva.nl
 When logged into the account, pull the tutorial repository to your system, which can be done by
 %
 \begin{lstlisting}
-git clone https://dgoldsb@bitbucket.org/dgoldsb/tipsi-tutorial.git
+git clone https://github.com/dgoldsb/tipsitutorial
 \end{lstlisting}
 %
 which will copy the tutorial directory as a new directory in your current folder. Exploring the folder shows the following subfolders:
 %
 \begin{lstlisting}
-%*\textcolor{blue}{bin} \textcolor{blue}{documents} \textcolor{blue}{dipeptala-input} 
-\textcolor{blue}{dnabr-equilibratedpath} \textcolor{blue}{dnabr-input} \textcolor{blue}{output} README.md
+%*\textcolor{blue}{bin} \textcolor{blue}{documents} \textcolor{blue}{dipeptala-input} \textcolor{blue}{dnabr-input}
+\newline
+\textcolor{blue}{dnabr-tipsi} \textcolor{blue}{dicynebts} \textcolor{blue}{exampleresults} README.md
 \end{lstlisting}
 %
-The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this tutorial are included in \texttt{\textcolor{blue}{dipeptala-input}}, and output will be written into \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
+The folder \texttt{\textcolor{blue}{bin}} contains some analysis tools we will use later, as well as the \texttt{TIPSI} distribution. All input files required for this part of the tutorial are included in \texttt{\textcolor{blue}{dipeptala-input}}, and output will be written into a new folder \texttt{\textcolor{blue}{output}}. The \texttt{\textcolor{blue}{documents}} directory contains supporting reading material.
 
-We enter the directory \texttt{\textcolor{blue}{dipeptala-input} } and explore, which shows the following 8 files:
+We enter the directory \texttt{\textcolor{blue}{dipeptala-input}} and explore, which shows the following 9 files:
 %
 \begin{lstlisting}
-dipeptala.pdb emw.mdp highT.mdp posre.mdp 
-submit_highT submit_md em.mdp md.mdp
+dipeptala.pdb em.mdp  emw.mdp highT.mdp md.mdp
+posre.mdp submit_highT submit_md submit_tipsi
 \end{lstlisting}
 %
-The \texttt{.gro} file contains the structure of the molecule we simulate, in our case dipeptide analine. To view this structure, copy the file to your own PC using a secure copy command, and view the structure in VMD. A nice piece of software that can help in copying files is FileZilla, which provides a GUI for secure copy.
+The \texttt{.pdb} file contains the structure of the molecule we simulate, in our case alanine dipeptide. To view this structure, copy the file to your own PC using a secure copy command, and view the structure in VMD. A nice piece of software that can help in copying files is FileZilla, which provides a GUI for secure copy.
 
 To run an MD simulaton we first need to obtain the topology. We can do this by entering
 %
@@ -103,7 +107,7 @@ mdrun -deffnm emw -v
 The option \texttt{-v} requests verbose output. We see that the solvent does not contain ions, thus we add 100 mM of NaCl to the system by replacing water molecules in the solvent. First, we make a new input file \texttt{ion.tpr}.
 %
 \begin{lstlisting}
-grompp -f emw.mdp -c emw.gro -p topol.top -o ion.twp
+grompp -f emw.mdp -c emw.gro -p topol.top -o ion.tpr
 \end{lstlisting}
 %
 We add ions to this as follows
@@ -116,7 +120,7 @@ We pick option 13 to replace water molecules with Na$^+$ and Cl$^{-1}$ ions. For
 %
 \begin{lstlisting}
 grompp -f em.mdp -c ion.gro -p topol.top -o em.tpr
-mdrun -deffnm posre -v
+mdrun -deffnm em -v
 \end{lstlisting}
 % 
 To relax the water and ions around the protein we perform a position constrained run. This implies that all non-hydrogen atoms in the protein are fixed in their position.
@@ -129,98 +133,72 @@ mdrun -deffnm posre -v
 To visualize the trajectory later, we need to make a snapshot of the system at the start of the MD simulation. IN order to do so, we run
 %
 \begin{lstlisting}
-trjconv -f posre.gro -s posre.tpr -pbc mol -center  -ur compact -o showdipept.gro
+trjconv -f posre.gro -s posre.tpr -pbc mol -center  -ur compact -o dipept_show.gro
 \end{lstlisting}
 %
-We pick option 1 for our first option to center the protein. The second option depends on your hardware and the length of your simulation. In this case we can pick option 0, as the system is small. If your simulation is long, the system is big, or your RAM is limited, option 1 is preferred to ignore solvent molecules. The output \texttt{showdipept.gro} can be visualized in VMD.
+We pick option 1 for our first option to center the protein. The second option depends on your hardware and the length of your simulation. In this case we can pick option 0, as the system is small. If your simulation is long, the system is big, or your RAM is limited, option 1 is preferred to ignore solvent molecules. The output \texttt{dipept\_show.gro} can be visualized in \textsc{VMD}.
 
 %Already added solvent, did an energy minimization and contrained run. 
-Now that we have relaxed the solvent we can run an MD simulation. We want to ensure that the transition between the two states takes place, so it is typically not a bad idea to run at a higher temperature (400K). The resulting trajectory will serve as an input for \textsc{TIPSI}, and will be used to find many more transitions. We will also use this trajectory to define the stable states.
+Now that we have relaxed the solvent we can run an MD simulation. We want to ensure that the transition between the two states takes place, so it is typically not a bad idea to run at a higher temperature (400K). The resulting trajectory will serve as an input for \textsc{TIPSI}, and will be used to find many more transitions.
 %
 \begin{lstlisting}
 grompp -f highT.mdp -c posre.gro -p topol.top -o highT.tpr
-qsub submit\_md
+qsub submit_highT
 \end{lstlisting}
 %
-\textsc{TIPSI} also requires a \texttt{.tpr} file in which the MD simulation conditions that you are interested in are defined. These conditions will be used for all simulation run in the TPS process. We want these simulations to take place at room temperature (298K). We generate the \texttt{.tpr} as follows:
+We will also run the simulation at room temperature, but for a shorter duration, in order to define the stable states. The\texttt{.tpr} file in which the MD simulation conditions that you are interested in are defined is also an input for \textsc{tipsi}. These conditions will be used for all simulation run in the TPS process. We want these simulations to take place at room temperature (298K). We generate the \texttt{.tpr} and run the simulation as follows:
 %
 \begin{lstlisting}
-grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
+grompp -f md.mdp -c posre.gro -p topol.top -o md.tpr
+qsub submit_md
 \end{lstlisting}
 %
 The output will be put in the \texttt{\textcolor{blue}{output}} directory.
 
-LAGE TEMP TOCH WEL, MAAR KORT, 10 nanosec, is het echt stabiel?
-
 \subsubsection*{Running TIPSI}
 
-% inspect all submit files in the tutorial
-% vermeld compilen kan lang duren bij een lang sourcetrajectory
+Before all else, we should check if the right files are flagged as executable. The file \texttt{/documents/executables.txt} contains a list of all files in the \texttt{/bin/tipsi/}-directory that should be flagged as executable. Executable files should show green when using the \texttt{ls} command in this directory.
 
-Check if the right things are executables.
-
-To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of ome collective variable. In this example, we use the radius of gyration and the dihedral angle over atoms (5, 7, 9, 15).
-
-NOTE: applied -1 here to run in TIPSI
-
-[ Protein ]
-  0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
-  16   17   18   19   20   21  
-
-[ Dihedral1 ]
-   4    6    8   14
-
-[ Dihedral2 ]
-   16   14   8   6
-
-First, to analyze our initial run, go to the output folder of the high temperature run. Now, run
+To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of some collective variable. In this example, we use two dihedrals, $\phi$ and $\psi$. We create a an index file defining these dihedrals by going to the output directory of the room temperature simulation, and run
 %
 \begin{lstlisting}
-g_gyrate -f highT.xtc -s highT.tpr -o gyr_highT.xvg
+vim angle.ndx
 \end{lstlisting}
 %
-to generate a dataset containing the radius of gyration for each frame. Then, define all dihedral angles by running
+after which we copy-paste the following:
 %
 \begin{lstlisting}
-mk_angndx -s highT.tpr -n angle.ndx -type dihedral
-\end{lstlisting}
-%
-followed by
-%
-\begin{lstlisting}
-g_angle -f highT.xtc -od angles.ndx -ov dihed_highT.xvg 
--type dihedral
-\end{lstlisting}
-%
-with option 8 (5, 7, 9, 15) to generate a dataset of the dihedral angles. We can visualize how often each combination of these two variables is visited by running
-%
-\begin{lstlisting}
-python ../../bin/generate2Dbins.py gyr_highT.xvg 1 dihed_highT.xvg 
-1 0.2 0.3 -180 -40 100 100 Gyration Dihedral Dihedrals\ Landscape
-\end{lstlisting}
-%
-This script will generate a set of plots in \texttt{.pdf} format. Transfer the plots to your computer and view them. You will see that there are two combinations of a radius of gyration and dihedral angle that are visited a lot by the simulation. If we repeat this with the lowT results, we see that there are few transitions between the states. As such, they can be considered semi-stable, and are our A and B state for \textsc{TIPSI}. Note down the ranges for both variables at which the molecule is in a semi-stable state.
+[ Phi ]
+5 7 9 15
 
-Go to the \textcolor{blue}{\texttt{./bin}} directory, and look at the \texttt{tps.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state in accordance with the range that you noted down. There is little documentation so far on how to include other variables in the parameter file, so some alternative options are included in an appendix. Make sure to fill in your own directory in the parameter file for the location of the \texttt{.gro} file, as we enter the full path here, not the relative path.
-
-DO WE STILL?
-
-We included a group of atoms in out parameter file, namely \texttt{protein}. We must define this custom group in an \texttt{.ndx} file to pass this group to TIPSI. Go to the input directory, and run
-%
-\begin{lstlisting}
-make_ndx -f lowT.tpr
+[ Psi ]
+7 9 15 17
 \end{lstlisting}
 %
-If you open this file with \texttt{more}, you will see that groups are defined in blocks, and that the name of the block is specified by a header in square brackets. The produced file allows you to use any of the \textsc{gromacs} standard groups. Custom groups can be made manually, and are referred to by their header. The index file of choice is included in the \textcolor{green}{\texttt{run\_ tipsi}} file. We edit this file slightly to contain just the groups that we are interested in: the protein group, and the group for the dihedral angle. Open \texttt{index.ndx}, and delete the blocks in index.ndx that are not the protein group, and rename the file \texttt{index-pr-dh.ndx}. Then, add
+After we save and quit (\texttt{:wq} in vim), we analyze our simulation using the dihedrals describedz in the index file. We run
 %
 \begin{lstlisting}
-[ Dihedral ]
-   5    7    9   15
+g_angle -f md.xtc -od angle.ndx -ov dihed_phi.xvg -type dihedral
 \end{lstlisting}
 %
-and save the file in the input directory.
+with option 0 and 
+%
+\begin{lstlisting}
+g_angle -f md.xtc -od angle.ndx -ov dihed_psi.xvg -type dihedral
+\end{lstlisting}
+%
+with option 1 to generate a dataset of the dihedral angles. We can visualize how often each combination of these two variables is visited by running
+%
+\begin{lstlisting}
+python ../../bin/generate2Dbins.py dihed_phi.xvg 1 dihed_psi.xvg 
+1 -180 180 -180 180 100 100 Phi Psi Dihedrals\ Landscape
+\end{lstlisting}
+%
+This script will generate a set of plots in \texttt{.pdf} format. Transfer the plots to your computer and view them. You will see that there are two combinations of the dihedral angles that are visited a lot by the simulation. We see that the area between these two states are not visited often. As such, they can be considered semi-stable, and are our A and B state for \textsc{TIPSI}. Note down the ranges for both variables at which the molecule is in a semi-stable state.
 
-ONLY THE DIHEDRALS, DONT INCLUDE THE FILE IN THE REPO
+Go to the \textcolor{blue}{\texttt{bin}} directory, and look at the \texttt{tps-dipept.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state in accordance with the range that you noted down. There is little documentation so far on how to include other variables in the parameter file, so some alternative options are included in an appendix.
+
+We included groups of atoms in out parameter file, namely \texttt{phi} and \texttt{psi}. We must define this custom group in an \texttt{.ndx} file to pass this group to TIPSI. If explore the \textcolor{green}{\texttt{run\_tipsi-dipept}} file, we see that the \texttt{angle.ndx} file is taken as input. To make sure that this file is copied to the node, we make a copy of the file in the \textcolor{blue}{\texttt{dipeptala-input}} directory. In \textcolor{green}{\texttt{run\_tipsi-dipept}} , we can also set the number of processors used by \textsc{tipsi}, which should match the number we assigned in the submit script (8 processors), as well as the number of shooting moves performed, which in this case is set to 10. As a sidenote, by generating an index file with \textsc{gromacs}, you can use any of the \textsc{gromacs} standard groups. 
 
 Finally, we need to copy our initial trajectory to our input directory. Change your directory to your high temperature MD output, and exectute 
 %
@@ -229,9 +207,7 @@ cp highT.trr ../../input-dipeptala/highT.trr
 \end{lstlisting}
 %
 
-BRIEFLY STATE  WHAT IS WHAT
-
-Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_ tipsi}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
+Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_ tipsi-dipept}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
 %
 \begin{lstlisting}
 qsub submit_tipsi
@@ -240,38 +216,33 @@ qsub submit_tipsi
 
 \subsubsection*{Analyzing Results from TIPSI}
 
-% TODO: Putting trajectories together
-The \begin{lstlisting}match_paths.sh\end{lstlisting} script should put together all the trajectories.
+The \textcolor{green}{\texttt{bin/match\_paths.sh}} script should put together all the trajectories automatically before the output is copied from the node to you own directory. All paths can be found in the \textcolor{blue}{\texttt{output/jobname/DATA}} directory. Copy a complete trajectory to your own PC to confirm that the trajectory is correct, by visualizing it in \textsc{VMD}. You can compare your result to the trajectory in the \textcolor{blue}{\texttt{exampleresults}} folder.
 
-Properties are in extra file
+Go further into DATA
+!!!!!!!
 
-If you feel brave, you can check if there were no warnings or errors by opening mergelog.txt and searching for WARNING/Warning/warning and error. 
-
-% TODO: Treeplot
-% TODO: Analyze if they are decorrelated
-% TODO: Calculate average pathlength
-
-
-
-Identify	where	the	transition	takes	place	from	A	to	B.	
-This	data	was	generated	using	TPS	in	the	one-way	shooting	mode.	This	means	
-that	first	a	random	frame	was	selected	from	which	to	start	a	new	MD	run.	This	
-MD	run	can	go	either	forward	to	state	B,	or	backward,	to	state	A.	Going	backward	
-is	achieved	by	multiplying	the	velocities	with	-1.	Whether	the	MD	simulation	
-goes	backward	or	forward	is	randomly	decided.	As	a	result,	a	new	reactive	
-trajectory	then	consists	of	a	part	that	is	generated	in	the	new	MD	simulation,	and	
-a	part	that	is	kept	from	the	previous	trajectory.	
-
+The \textcolor{green}{\texttt{bin/match\_paths.sh}} script also output a file that contains some data on the TPS process. We can process this information by running
+%
+\begin{lstlisting}
+python ../../../bin/processTIPSImerge.py metainfo.csv
+\end{lstlisting}
+% 
+This has to be done on your own machine, however, as an image is outputted to the screen, and Carbon runs outdated Python libraries. The output will detail the average path length, number of decorrelated paths, the shooting tree, and the ratio between forward shooting moves and backward shooting moves If you feel brave, you can check if there were no warnings or errors by opening \texttt{mergelog.txt} and searching for WARNING/Warning/warning and error. 
 
 \newpage
 
 \subsection*{DNA Baseroll}
 
-(Short introduction with picture)
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.25]{images/pairing.png}
+    \caption{Alanine dipeptide, dihedrals labeled $\phi$ and $\psi$.}
+    \label{fig:dnabr}
+\end{figure}
 
-\subsubsection*{Preparatory Analysis}
+For the second example, we examine the case of the 'DNA baseroll'. This is an actual rare event, in which a DNA basepair transition from the Watson-Crick configuration to the Hoogsteen pairing, or vice versa. These two configurations are illustrated in Fig.~\ref{fig:dnabr}. This event typically does not occur when running a normal MD simulation for a microsecond, but using \textsc{tipsi} we will generate several new transitions.
 
-% GMXLIB
+\subsubsection*{Preparation}
 
 We again log into the Carbon cluster. Make sure you are connected to the UvA network or VPN, and enter
 %
@@ -280,130 +251,56 @@ ssh user@carbon.science.uva.nl
 \end{lstlisting}
 %
 
-SAY HOW TO DO REGULAR MD, BUT ALL WE NEED IS TPR
-We enter the directory \texttt{\textcolor{blue}{input}} and explore, which shows the following 8 files:
+We enter the directory \texttt{\textcolor{blue}{dna-br}} and explore, which shows the following files:
 %
 \begin{lstlisting}
-dipeptala.pdb emw.mdp highT.mdp posre.mdp 
-submit_highT submit_md em.mdp md.mdp
+conf.gro run.mdp submit_md topol_DNA_chain_A.itp 
+topol_DNA_chain_B.itp topol_DNA.itp topol_Ion2.itp topol.top %*\textcolor{blue}{top}
 \end{lstlisting}
 %
-The \texttt{.gro} file contains the structure of the molecule we simulate, in our case dipeptide analine. To view this structure, copy the file to your own PC using a secure copy command, and view the structure in VMD. A nice piece of software that can help in copying files is FileZilla, which provides a GUI for secure copy.
-
-Already added solvent, did an energy minimaztion and contrained run. Now that we have relaxed the solvent we can run the MD simulation. Typically when preparing for \textsc{TIPSI} we run at two temperatures, room temperature (298K) and a higher temperature (400K). Here we do room only, otherwise denatures completely. The simulation at room temperature shows the stable state at the temperature we are interested in. At the higher temperature, the system will transition more easily to the second stable state. This simulation will provide the initial transition trajectory, and also helps us define the two stable states. We run these by entering:
+First, we need to install a custom topology, which we do by running
+%
+\begin{lstlisting}
+export GMXLIB=./top
+\end{lstlisting}
+%
+We can generate the \texttt{tpr} file necessarry to run \textsc{tipsi} by executing
 %
 \begin{lstlisting}
 grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
-qsub submit\_md
 \end{lstlisting}
 %
-The output will be put in the \texttt{\textcolor{blue}{output}} directory.
-
-% genereer tpr zelf, verander timestep naar de juiste, oude verwijderen
+after which we move this file to our directory for \textsc{tipsi} input
+%
+\begin{lstlisting}
+mv md.tpr ../dnabr-tipsi/
+\end{lstlisting}
+%
+Normally it is necessarry to run a regular MD simulation to confirm that the two states are stable, but in this example this is a given. This can still be done by running the submit script, if you are interested in confirming that the transition does not happen at room temperature in a regular MD simulation.
 
 \subsubsection*{Running TIPSI}
 
-* glycosidic angle: 483, 484, 486, 499
-* bp (waterstofbrug die altijd gevormd wordt bij baseparing): 275, 492
-* wc (waterstofbrug die gevormd wordt bij WC paring): 276, 495
-* hg (waterstofbrug die gevormd wordt bij Hoogsteen paring): 276, 489
+To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. The stable states are in this case define by whether certain hydrogen bonds exist. In Fig.~\ref{fig:dnabr}, we can see the hydrogen bonds formed in both pairings. We are dealing with an A-T basepair, so there should be two hydrogen bonds in either configuration. One hydrogen bond is always present, and is between atoms 275 and 492. The hydrogen bond unique in the Watson-Crick pairing is between atoms 276 and 495, and the bond unique to the Hoogsteen pairing is between 276 and 289.
 
-STATES ARE ALREADY DEFINED, GIVE THE 3 CONDITIONS
-To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of ome collective variable. In this example, we use the radius of gyration and the dihedral angle over atoms (5, 7, 9, 15).
+Go to the \textcolor{blue}{\texttt{./bin}} directory, and look at the \texttt{tps-dnabr.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state correctly. Notice that the numbers are not the same! This is because we define the atoms now in a Numpy array. This array is 0-indexed, whereas \textsc{gromacs} starts counting at 1. For more information on this, read the appendix on \textsc{tipsi} parameter files.
 
-First, to analyze our initial run, go to the output folder of the high temperature run. Now, run
-%
-\begin{lstlisting}
-g_gyrate -f highT.xtc -s highT.tpr -o gyr_highT.xvg
-\end{lstlisting}
-%
-to generate a dataset containing the radius of gyration for each frame. Then, define all dihedral angles by running
-%
-\begin{lstlisting}
-mk_angndx -s highT.tpr -n angle.ndx -type dihedral
-\end{lstlisting}
-%
-followed by
-%
-\begin{lstlisting}
-g_angle -f highT.xtc -od angles.ndx -ov dihed_highT.xvg 
--type dihedral
-\end{lstlisting}
-%
-with option 8 (5, 7, 9, 15) to generate a dataset of the dihedral angles. We can visualize how often each combination of these two variables is visited by running
-%
-\begin{lstlisting}
-python ../../bin/generate2Dbins.py gyr_highT.xvg 1 dihed_highT.xvg 
-1 0.2 0.3 -180 -40 100 100 Gyration Dihedral GyrDihed
-\end{lstlisting}
-%
-This script will generate a set of plots in \texttt{.pdf} format. Transfer the plots to your computer and view them. You will see that there are two combinations of a radius of gyration and dihedral angle that are visited a lot by the simulation. If we repeat this with the lowT results, we see that there are few transitions between the states. As such, they can be considered semi-stable, and are our A and B state for \textsc{TIPSI}. Note down the ranges for both variables at which the molecule is in a semi-stable state.
-
-Go to the \textcolor{blue}{\texttt{./bin}} directory, and look at the \texttt{tps.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state in accordance with the range that you noted down. There is little documentation so far on how to include other variables in the parameter file, so some alternative options are included in an appendix. Make sure to fill in your own directory in the parameter file for the location of the \texttt{.gro} file, as we enter the full path here, not the relative path.
-
-We included a group of atoms in out parameter file, namely \texttt{protein}. We must define this custom group in an \texttt{.ndx} file to pass this group to TIPSI. Go to the input directory, and run
-%
-\begin{lstlisting}
-make_ndx -f lowT.tpr
-\end{lstlisting}
-%
-If you open this file with \texttt{more}, you will see that groups are defined in blocks, and that the name of the block is specified by a header in square brackets. The produced file allows you to use any of the \textsc{gromacs} standard groups. Custom groups can be made manually, and are referred to by their header. The index file of choice is included in the \textcolor{green}{\texttt{run\_ tipsi}} file. We edit this file slightly to contain just the groups that we are interested in: the protein group, and the group for the dihedral angle. Open \texttt{index.ndx}, and delete the blocks in index.ndx that are not the protein group, and rename the file \texttt{index-pr-dh.ndx}. Then, add
-%
-\begin{lstlisting}
-[ Dihedral ]
-   5    7    9   15
-\end{lstlisting}
-%
-and save the file in the input directory.
-
-Finally, we need to copy our initial trajectory to our input directory. Change your directory to your high temperature MD output, and exectute 
-%
-\begin{lstlisting}
-cp highT.trr ../../input-dipeptala/highT.trr
-\end{lstlisting}
-%
-
-Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_ tipsi}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
+Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_tipsi-dnabr}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
 %
 \begin{lstlisting}
 qsub submit_tipsi
 \end{lstlisting}
 %
+in the \textcolor{blue}{\texttt{./dnabr-tipsi}} directory.
 
 \subsubsection*{Analyzing Results from TIPSI}
 
-resname resid 9DT, 4DA
-
+As in the previous example, you should compare your result to the transition in the \textcolor{blue}{\texttt{exampleresults}} folder to verify that you captured the transition. The basepair of interest can be isolated in \textsc{VMD} by visualizing only \texttt{resname DT and resID 9}, and \texttt{resname DA and resID 4}. You can process the information in the TPS process again by running
+%
 \begin{lstlisting}
-# Dirty index file written in vim, should suffice
-[bp]
-275 492
-[wc]
-276 495
-[hg]
-276 289
-[glycosydic angle]
-483 484 486 499
-[bp1]
-275
-[bp2]
-492
-[wc1]
-276
-[wc2]
-495
-[hg1]
-276
-[hg2]
-489
+python ../../../bin/processTIPSImerge.py metainfo.csv
 \end{lstlisting}
-
-% TODO: Putting trajectories together
-% TODO: Treeplot
-% TODO: Analyze if they are decorrelated
-% TODO: Calculate average pathlength
-
-% TODO: MAYBE OPS
+% 
+on your PC. Is the ratio between backward and forward shooting moves about 0.5? And is the tree similarly shaped as the tree from example 1?
 
 \newpage
 
