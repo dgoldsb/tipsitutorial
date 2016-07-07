@@ -1,0 +1,199 @@
+# No maximum runtime set. Will run until finished or until crash.
+# Program options specified on command line:
+#     --mdrun-append
+#===
+
+# Thu Jun 09 15:41:18 2016 
+# Command:
+/state/partition1/dylan/dnabaseroll-TIPSI-6332/tipsi/gromit.sh -f 1-0-FW.tpr --mdrun-append -np 16 -g 1-0-FW.out -e 1-0-FW.err -gmxrc /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC -control /state/partition1/dylan/dnabaseroll-TIPSI-6332/tipsi/tipsi.py monitor -ndx /state/partition1/dylan/dnabaseroll-TIPSI-6332/index-dnabr.ndx -par /state/partition1/dylan/dnabaseroll-TIPSI-6332/tps-dnabr.par -tpr @TPR -trr @TRR -pid @PID -pi parent.dat -po path.dat -sleep 60 -maxf 2000 -2way 0 -rand 0 -minlen 10 -v -out 1-0-FW.dat -mdrun /usr/mpi/intel/openmpi-1.4.5/bin/mpirun /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f
+
+# Input structure:     /state/partition1/dylan/dnabaseroll-TIPSI-6332/DATA/1/0/1-0-FW.tpr
+# Base name:           1-0-FW
+# Source directory:    /state/partition1/dylan/dnabaseroll-TIPSI-6332/DATA/1/0
+# Command issued from: /state/partition1/dylan/dnabaseroll-TIPSI-6332/DATA/1/0
+# Run directory:       /state/partition1/dylan/dnabaseroll-TIPSI-6332/DATA/1/0
+
+# GROMACS 
+#=========
+# - binaries:  /opt/bio/gromacs/bin
+# - data:      /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/share
+# - libraries: /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/share/gromacs/top
+
+# Starting at step 10:    PRODUCTION
+# Stopping at step 10:    PRODUCTION
+# Starting MD protocol for /state/partition1/dylan/dnabaseroll-TIPSI-6332/DATA/1/0/1-0-FW.tpr
+
+#-------------------------------------
+#---= THIS IS WHERE WE START MD =--- 
+#-------------------------------------
+# Not executing:
+
+# Thu Jun 09 15:41:18 2016 MDS 20851 : MDRUNNER
+
+/usr/mpi/intel/openmpi-1.4.5/bin/mpirun /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f -nice 0 -deffnm 1-0-FW -c 1-0-FW.gro -cpi 1-0-FW.cpt -nt 16 -noappend -append -maxh -1
+
+# Thu Jun 09 15:41:18 2016 MDS 20851 : MDRUN PID: 20951
+# Thu Jun 09 15:41:18 2016 MDS 20851 : Monitoring run
+
+/state/partition1/dylan/dnabaseroll-TIPSI-6332/tipsi/tipsi.py monitor -ndx /state/partition1/dylan/dnabaseroll-TIPSI-6332/index-dnabr.ndx -par /state/partition1/dylan/dnabaseroll-TIPSI-6332/tps-dnabr.par -tpr 1-0-FW.tpr -trr 1-0-FW.trr -pid 20951 -pi parent.dat -po path.dat -sleep 60          -maxf  2000 -2way 0 -rand 0 -minlen 10 -v -out 1-0-FW.dat
+
+# Thu Jun 09 15:41:18 2016 MDS 20851 : Monitor PID: 20954
+MONITOR: Running /state/partition1/dylan/dnabaseroll-TIPSI-6332/tipsi/tipsi.py in MONITOR mode
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.70214891  0.          0.        ]
+MONITOR:  [ 0.          6.70214891  0.        ]
+MONITOR:  [ 3.3510797   3.3510797   4.7391367 ]]
+MONITOR: [[ 6.70214891  0.          0.        ]
+MONITOR:  [ 0.          6.70214891  0.        ]
+MONITOR:  [ 3.3510797   3.3510797   4.7391367 ]]
+MONITOR: [[ 6.70214891  0.          0.        ]
+MONITOR:  [ 0.          6.70214891  0.        ]
+MONITOR:  [ 3.3510797   3.3510797   4.7391367 ]]
+MONITOR: ----- 50.00% [[ 6.70619154  0.          0.        ]
+MONITOR:  [ 0.          6.70619154  0.        ]
+MONITOR:  [ 3.35310102  3.35310102  4.74199486]]
+MONITOR: [[ 6.70619154  0.          0.        ]
+MONITOR:  [ 0.          6.70619154  0.        ]
+MONITOR:  [ 3.35310102  3.35310102  4.74199486]]
+MONITOR: [[ 6.70619154  0.          0.        ]
+MONITOR:  [ 0.          6.70619154  0.        ]
+MONITOR:  [ 3.35310102  3.35310102  4.74199486]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.71642733  0.          0.        ]
+MONITOR:  [ 0.          6.71642733  0.        ]
+MONITOR:  [ 3.35821891  3.35821891  4.74923277]]
+MONITOR: [[ 6.71642733  0.          0.        ]
+MONITOR:  [ 0.          6.71642733  0.        ]
+MONITOR:  [ 3.35821891  3.35821891  4.74923277]]
+MONITOR: [[ 6.71642733  0.          0.        ]
+MONITOR:  [ 0.          6.71642733  0.        ]
+MONITOR:  [ 3.35821891  3.35821891  4.74923277]]
+MONITOR: ----- 50.00% [[ 6.73446083  0.          0.        ]
+MONITOR:  [ 0.          6.73446083  0.        ]
+MONITOR:  [ 3.36723566  3.36723566  4.76198435]]
+MONITOR: [[ 6.73446083  0.          0.        ]
+MONITOR:  [ 0.          6.73446083  0.        ]
+MONITOR:  [ 3.36723566  3.36723566  4.76198435]]
+MONITOR: [[ 6.73446083  0.          0.        ]
+MONITOR:  [ 0.          6.73446083  0.        ]
+MONITOR:  [ 3.36723566  3.36723566  4.76198435]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 3 frames
+MONITOR: [[ 6.7118268   0.          0.        ]
+MONITOR:  [ 0.          6.7118268   0.        ]
+MONITOR:  [ 3.35591865  3.35591865  4.74597979]]
+MONITOR: [[ 6.7118268   0.          0.        ]
+MONITOR:  [ 0.          6.7118268   0.        ]
+MONITOR:  [ 3.35591865  3.35591865  4.74597979]]
+MONITOR: [[ 6.7118268   0.          0.        ]
+MONITOR:  [ 0.          6.7118268   0.        ]
+MONITOR:  [ 3.35591865  3.35591865  4.74597979]]
+MONITOR: ----- 33.00% [[ 6.72626209  0.          0.        ]
+MONITOR:  [ 0.          6.72626209  0.        ]
+MONITOR:  [ 3.36313629  3.36313629  4.75618696]]
+MONITOR: [[ 6.72626209  0.          0.        ]
+MONITOR:  [ 0.          6.72626209  0.        ]
+MONITOR:  [ 3.36313629  3.36313629  4.75618696]]
+MONITOR: [[ 6.72626209  0.          0.        ]
+MONITOR:  [ 0.          6.72626209  0.        ]
+MONITOR:  [ 3.36313629  3.36313629  4.75618696]]
+MONITOR: ----- 66.00% [[ 6.71157598  0.          0.        ]
+MONITOR:  [ 0.          6.71157598  0.        ]
+MONITOR:  [ 3.35579324  3.35579324  4.7458024 ]]
+MONITOR: [[ 6.71157598  0.          0.        ]
+MONITOR:  [ 0.          6.71157598  0.        ]
+MONITOR:  [ 3.35579324  3.35579324  4.7458024 ]]
+MONITOR: [[ 6.71157598  0.          0.        ]
+MONITOR:  [ 0.          6.71157598  0.        ]
+MONITOR:  [ 3.35579324  3.35579324  4.7458024 ]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.71525145  0.          0.        ]
+MONITOR:  [ 0.          6.71525145  0.        ]
+MONITOR:  [ 3.35763097  3.35763097  4.74840117]]
+MONITOR: [[ 6.71525145  0.          0.        ]
+MONITOR:  [ 0.          6.71525145  0.        ]
+MONITOR:  [ 3.35763097  3.35763097  4.74840117]]
+MONITOR: [[ 6.71525145  0.          0.        ]
+MONITOR:  [ 0.          6.71525145  0.        ]
+MONITOR:  [ 3.35763097  3.35763097  4.74840117]]
+MONITOR: ----- 50.00% [[ 6.71415901  0.          0.        ]
+MONITOR:  [ 0.          6.71415901  0.        ]
+MONITOR:  [ 3.35708475  3.35708475  4.74762869]]
+MONITOR: [[ 6.71415901  0.          0.        ]
+MONITOR:  [ 0.          6.71415901  0.        ]
+MONITOR:  [ 3.35708475  3.35708475  4.74762869]]
+MONITOR: [[ 6.71415901  0.          0.        ]
+MONITOR:  [ 0.          6.71415901  0.        ]
+MONITOR:  [ 3.35708475  3.35708475  4.74762869]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.71411371  0.          0.        ]
+MONITOR:  [ 0.          6.71411371  0.        ]
+MONITOR:  [ 3.3570621   3.3570621   4.74759674]]
+MONITOR: [[ 6.71411371  0.          0.        ]
+MONITOR:  [ 0.          6.71411371  0.        ]
+MONITOR:  [ 3.3570621   3.3570621   4.74759674]]
+MONITOR: [[ 6.71411371  0.          0.        ]
+MONITOR:  [ 0.          6.71411371  0.        ]
+MONITOR:  [ 3.3570621   3.3570621   4.74759674]]
+MONITOR: ----- 50.00% [[ 6.71580553  0.          0.        ]
+MONITOR:  [ 0.          6.71580553  0.        ]
+MONITOR:  [ 3.35790801  3.35790801  4.74879313]]
+MONITOR: [[ 6.71580553  0.          0.        ]
+MONITOR:  [ 0.          6.71580553  0.        ]
+MONITOR:  [ 3.35790801  3.35790801  4.74879313]]
+MONITOR: [[ 6.71580553  0.          0.        ]
+MONITOR:  [ 0.          6.71580553  0.        ]
+MONITOR:  [ 3.35790801  3.35790801  4.74879313]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.714849    0.          0.        ]
+MONITOR:  [ 0.          6.714849    0.        ]
+MONITOR:  [ 3.35742974  3.35742974  4.74811697]]
+MONITOR: [[ 6.714849    0.          0.        ]
+MONITOR:  [ 0.          6.714849    0.        ]
+MONITOR:  [ 3.35742974  3.35742974  4.74811697]]
+MONITOR: [[ 6.714849    0.          0.        ]
+MONITOR:  [ 0.          6.714849    0.        ]
+MONITOR:  [ 3.35742974  3.35742974  4.74811697]]
+MONITOR: ----- 50.00% [[ 6.72710371  0.          0.        ]
+MONITOR:  [ 0.          6.72710371  0.        ]
+MONITOR:  [ 3.3635571   3.3635571   4.75678205]]
+MONITOR: [[ 6.72710371  0.          0.        ]
+MONITOR:  [ 0.          6.72710371  0.        ]
+MONITOR:  [ 3.3635571   3.3635571   4.75678205]]
+MONITOR: [[ 6.72710371  0.          0.        ]
+MONITOR:  [ 0.          6.72710371  0.        ]
+MONITOR:  [ 3.3635571   3.3635571   4.75678205]]
+MONITOR: ----- 100.00%
+MONITOR: Processing 2 frames
+MONITOR: [[ 6.73430872  0.          0.        ]
+MONITOR:  [ 0.          6.73430872  0.        ]
+MONITOR:  [ 3.36715961  3.36715961  4.76187706]]
+MONITOR: [[ 6.73430872  0.          0.        ]
+MONITOR:  [ 0.          6.73430872  0.        ]
+MONITOR:  [ 3.36715961  3.36715961  4.76187706]]
+MONITOR: [[ 6.73430872  0.          0.        ]
+MONITOR:  [ 0.          6.73430872  0.        ]
+MONITOR:  [ 3.36715961  3.36715961  4.76187706]]
+MONITOR: Stop condition met. Killing job with PID 20951
+MONITOR: ----- 50.00% [[ 6.72602749  0.          0.        ]
+MONITOR:  [ 0.          6.72602749  0.        ]
+MONITOR:  [ 3.36301899  3.36301899  4.75602102]]
+MONITOR: [[ 6.72602749  0.          0.        ]
+MONITOR:  [ 0.          6.72602749  0.        ]
+MONITOR:  [ 3.36301899  3.36301899  4.75602102]]
+MONITOR: [[ 6.72602749  0.          0.        ]
+MONITOR:  [ 0.          6.72602749  0.        ]
+MONITOR:  [ 3.36301899  3.36301899  4.75602102]]
+MONITOR: ----- 100.00%
+MONITOR EXIT: 0
+# Thu Jun 09 15:48:19 2016 MDS 20851 : Run terminated by monitor.
+# Thu Jun 09 15:48:19 2016 MDS 20851 : Wrapping up and exiting.
+# Deleting redundant files:
+1-0-FW-EMv.tpr            1-0-FW-EMv.edr            1-0-FW-EMv.log            1-0-FW-EMv.trr            em-vac-out.mdp           
+1-0-FW-EMs.tpr            1-0-FW-EMs.edr            1-0-FW-EMs.log            1-0-FW-EMs.trr            em-sol-out.mdp           
+#*#                                                                                                                              
+# Thu Jun 09 15:48:19 2016 MDS 20851 : gromit.sh finished successfully

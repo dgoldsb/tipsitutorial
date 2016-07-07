@@ -1,0 +1,6 @@
+#include "gromos45a3.ff/forcefield.itp
+
+[ system ]
+Box of solvent, maybe with ions
+
+[ molecules ]

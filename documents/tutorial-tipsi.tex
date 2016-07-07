@@ -216,10 +216,45 @@ qsub submit_tipsi
 
 \subsubsection*{Analyzing Results from TIPSI}
 
-The \textcolor{green}{\texttt{bin/match\_paths.sh}} script should put together all the trajectories automatically before the output is copied from the node to you own directory. All paths can be found in the \textcolor{blue}{\texttt{output/jobname/DATA}} directory. Copy a complete trajectory to your own PC to confirm that the trajectory is correct, by visualizing it in \textsc{VMD}. You can compare your result to the trajectory in the \textcolor{blue}{\texttt{exampleresults}} folder.
+Running \textsc{tipsi} takes some time. While it runs, go to the directory \textcolor{blue}{\texttt{exampleresults/DATA}}. This folder contains some output generated in \textsc{tipsi}, bar the output trajectories. Explore the directory, you should see
+%
+\begin{lstlisting}
+0 1 2
+\end{lstlisting}
+%
+This implies that three shooting moves have been done. Now go to the directory \textcolor{blue}{\texttt{0/0}}, and do
+%
+\begin{lstlisting}
+more 0-0.dat
+\end{lstlisting}
+%
+Can you confirm that a transition took place? Now move up two directories, and go to the directory \textcolor{blue}{\texttt{2}}. Explore this directory, you should see
+%
+\begin{lstlisting}
+0 1
+\end{lstlisting}
+%
+This means there have been two attempts at a shooting move until one was accepted. Move to the directory \textcolor{blue}{\texttt{0}}, and execute
+%
+\begin{lstlisting}
+more 2-0-FW.dat
+\end{lstlisting}
+%
+This is a forward shooting move, as indicated by \texttt{FW}, and thus advances in time. Can you see why this shooting move was not accepted? Finally, move up one directory, and go to the directory \textcolor{blue}{\texttt{1}}. This is a backward trajectory, as indicated by the \texttt{BW} flag. Execute
+%
+\begin{lstlisting}
+more 2-1-BW.dat
+\end{lstlisting}
+%
+\textsc{TIPSI} does backward shooting moves by taking a negative timestep, can you confirm this? Can you see why this trajectory was accepted? The total trajectory, if accepted, is also described in a \texttt{dat} file. Execute
+%
+\begin{lstlisting}
+more 2-1.dat
+\end{lstlisting}
+%
+Can you identify which parts of the trajectory come from which shooting move?
 
-Go further into DATA
-!!!!!!!
+The \textcolor{green}{\texttt{bin/match\_paths.sh}} script should put together all the trajectories automatically before the output is copied from the node to you own directory. All paths can be found in the \textcolor{blue}{\texttt{output/jobname/DATA}} directory. Copy a complete trajectory to your own PC to confirm that the trajectory is correct, by visualizing it in \textsc{VMD}. You can compare your result to the trajectory in the \textcolor{blue}{\texttt{exampleresults}} folder.
 
 The \textcolor{green}{\texttt{bin/match\_paths.sh}} script also output a file that contains some data on the TPS process. We can process this information by running
 %
@@ -264,7 +299,7 @@ First, we need to install a custom topology, which we do by running
 export GMXLIB=./top
 \end{lstlisting}
 %
-We can generate the \texttt{tpr} file necessarry to run \textsc{tipsi} by executing
+We can generate the \texttt{tpr} file necessary to run \textsc{tipsi} by executing
 %
 \begin{lstlisting}
 grompp -f run.mdp -c conf.gro -p topol.top -o md.tpr
@@ -276,7 +311,7 @@ after which we move this file to our directory for \textsc{tipsi} input
 mv md.tpr ../dnabr-tipsi/
 \end{lstlisting}
 %
-Normally it is necessarry to run a regular MD simulation to confirm that the two states are stable, but in this example this is a given. This can still be done by running the submit script, if you are interested in confirming that the transition does not happen at room temperature in a regular MD simulation.
+Normally it is necessary to run a regular MD simulation to confirm that the two states are stable, but in this example this is a given. This can still be done by running the submit script, if you are interested in confirming that the transition does not happen at room temperature in a regular MD simulation.
 
 \subsubsection*{Running TIPSI}
 

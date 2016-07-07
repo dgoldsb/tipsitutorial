@@ -1,0 +1,151 @@
+/usr/mpi/intel/openmpi-1.4.5/bin/mpirun /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f -nice 0 -deffnm 1-0-FW -c 1-0-FW.gro -cpi 1-0-FW.cpt -nt 16 -noappend -append -maxh -1
+NNODES=16, MYRANK=0, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=3, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=8, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=12, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=14, HOSTNAME=compute-4-1.local
+NODEID=0 argc=15
+NODEID=8 argc=15
+                         :-)  G  R  O  M  A  C  S  (-:
+
+No previous checkpoint file present, assuming this is a new run.
+NNODES=16, MYRANK=1, HOSTNAME=compute-4-1.local
+NODEID=1 argc=15
+NNODES=16, MYRANK=4, HOSTNAME=compute-4-1.local
+NODEID=4 argc=15
+NNODES=16, MYRANK=5, HOSTNAME=compute-4-1.local
+NODEID=5 argc=15
+NNODES=16, MYRANK=6, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=7, HOSTNAME=compute-4-1.local
+NODEID=7 argc=15
+NODEID=3 argc=15
+NNODES=16, MYRANK=9, HOSTNAME=compute-4-1.local
+NODEID=9 argc=15
+NNODES=16, MYRANK=11, HOSTNAME=compute-4-1.local
+NODEID=11 argc=15
+NNODES=16, MYRANK=13, HOSTNAME=compute-4-1.local
+NODEID=13 argc=15
+NODEID=12 argc=15
+               GRoups of Organic Molecules in ACtion for Science
+
+                            :-)  VERSION 4.5.4  (-:
+
+        Written by Emile Apol, Rossen Apostolov, Herman J.C. Berendsen,
+      Aldert van Buuren, Pär Bjelkmar, Rudi van Drunen, Anton Feenstra, 
+        Gerrit Groenhof, Peter Kasson, Per Larsson, Pieter Meulenhoff, 
+           Teemu Murtola, Szilard Pall, Sander Pronk, Roland Schulz, 
+                Michael Shirts, Alfons Sijbers, Peter Tieleman,
+
+               Berk Hess, David van der Spoel, and Erik Lindahl.
+
+       Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+            Copyright (c) 2001-2010, The GROMACS development team at
+        Uppsala University & The Royal Institute of Technology, Sweden.
+            check out http://www.gromacs.org for more information.
+
+         This program is free software; you can redistribute it and/or
+          modify it under the terms of the GNU General Public License
+         as published by the Free Software Foundation; either version 2
+             of the License, or (at your option) any later version.
+
+   :-)  /share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/mdrun_mpi_f  (-:
+
+Option     Filename  Type         Description
+------------------------------------------------------------
+  -s     1-0-FW.tpr  Input        Run input file: tpr tpb tpa
+  -o     1-0-FW.trr  Output       Full precision trajectory: trr trj cpt
+  -x     1-0-FW.xtc  Output, Opt. Compressed trajectory (portable xdr format)
+-cpi     1-0-FW.cpt  Input, Opt!  Checkpoint file
+-cpo     1-0-FW.cpt  Output, Opt. Checkpoint file
+  -c     1-0-FW.gro  Output       Structure file: gro g96 pdb etc.
+  -e     1-0-FW.edr  Output       Energy file
+  -g     1-0-FW.log  Output       Log file
+-dhdl    1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-field   1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-table   1-0-FW.xvg  Input, Opt.  xvgr/xmgr file
+-tablep  1-0-FW.xvg  Input, Opt.  xvgr/xmgr file
+-tableb  1-0-FW.xvg  Input, Opt.  xvgr/xmgr file
+-rerun   1-0-FW.xtc  Input, Opt.  Trajectory: xtc trr trj gro g96 pdb cpt
+-tpi     1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-tpid    1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+ -ei     1-0-FW.edi  Input, Opt.  ED sampling input
+ -eo     1-0-FW.edo  Output, Opt. ED sampling output
+  -j     1-0-FW.gct  Input, Opt.  General coupling stuff
+ -jo     1-0-FW.gct  Output, Opt. General coupling stuff
+-ffout   1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-devout  1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-runav   1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+ -px     1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+ -pf     1-0-FW.xvg  Output, Opt. xvgr/xmgr file
+-mtx     1-0-FW.mtx  Output, Opt. Hessian matrix
+ -dn     1-0-FW.ndx  Output, Opt. Index file
+-multidir    1-0-FW  Input, Opt., Mult. Run directory
+
+Option       Type   Value   Description
+------------------------------------------------------
+-[no]h       bool   no      Print help info and quit
+-[no]version bool   no      Print version info and quit
+-nice        int    0       Set the nicelevel
+-deffnm      string 1-0-FW  Set the default filename for all file options
+-xvg         enum   xmgrace  xvg plot formatting: xmgrace, xmgr or none
+-[no]pd      bool   no      Use particle decompostion
+-dd          vector 0 0 0   Domain decomposition grid, 0 is optimize
+-npme        int    -1      Number of separate nodes to be used for PME, -1
+                            is guess
+-ddorder     enum   interleave  DD node order: interleave, pp_pme or cartesian
+-[no]ddcheck bool   yes     Check for all bonded interactions with DD
+-rdd         real   0       The maximum distance for bonded interactions with
+                            DD (nm), 0 is determine from initial coordinates
+-rcon        real   0       Maximum distance for P-LINCS (nm), 0 is estimate
+-dlb         enum   auto    Dynamic load balancing (with DD): auto, no or yes
+-dds         real   0.8     Minimum allowed dlb scaling of the DD cell size
+-gcom        int    -1      Global communication frequency
+-[no]v       bool   no      Be loud and noisy
+-[no]compact bool   yes     Write a compact log file
+-[no]seppot  bool   no      Write separate V and dVdl terms for each
+                            interaction type and node to the log file(s)
+-pforce      real   -1      Print all forces larger than this (kJ/mol nm)
+-[no]reprod  bool   no      Try to avoid optimizations that affect binary
+                            reproducibility
+-cpt         real   15      Checkpoint interval (minutes)
+-[no]cpnum   bool   no      Keep and number checkpoint files
+-[no]append  bool   yes     Append to previous output files when continuing
+                            from checkpoint instead of adding the simulation
+                            part number to all file names
+-maxh        real   -1      Terminate after 0.99 times this time (hours)
+-multi       int    0       Do multiple simulations in parallel
+-replex      int    0       Attempt replica exchange every # steps
+-reseed      int    -1      Seed for replica exchange, -1 is generate a seed
+-[no]ionize  bool   no      Do a simulation including the effect of an X-Ray
+                            bombardment on your system
+
+Reading file 1-0-FW.tpr, VERSION 4.5.4 (single precision)
+NNODES=16, MYRANK=10, HOSTNAME=compute-4-1.local
+NNODES=16, MYRANK=15, HOSTNAME=compute-4-1.local
+NODEID=15 argc=15
+NNODES=16, MYRANK=2, HOSTNAME=compute-4-1.local
+NODEID=2 argc=15
+NODEID=6 argc=15
+NODEID=10 argc=15
+NODEID=14 argc=15
+
+Will use 8 particle-particle and 8 PME only nodes
+This is a guess, check the performance at the end of the log file
+Making 2D domain decomposition 4 x 2 x 1
+
+WARNING: This run will generate roughly 3468 Mb of data
+
+starting mdrun 'Protein in water'
+20000000 steps,  40000.0 ps.
+
+NOTE: Turning on dynamic load balancing
+
+mpirun: killing job...
+
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 20960 on node compute-4-1.local exited on signal 0 (Unknown signal 0).
+--------------------------------------------------------------------------
+mpirun: clean termination accomplished
+
+16 total processes killed (some possibly by mpirun during cleanup)
+__MDRUN__
