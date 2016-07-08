@@ -8,7 +8,7 @@ import csv
 import sys
 import numpy as np
 
-# Goals: 
+# Goals:
 # Tree
 # Average path length
 # Ratio forward/backward
@@ -21,7 +21,12 @@ print(df.columns.values)
 # Average path
 df.Length = df.MAX - df.MIN
 lengths = df.Length.tolist()
-print('Average length is '+str(np.sum(lengths)/len(lengths))+' frames')
+# print('Average length is '+str(np.sum(lengths)/len(lengths))+' frames')
+total_length = 0
+strings=df.COMP.tolist()
+for string in strings:
+    total_length = total_length + len(string)/3
+print('Average length is '+str(total_length/len(lengths))+' frames')
 
 # Count FW over length
 FWs = df.DIR.tolist()
@@ -47,7 +52,7 @@ for string in strings:
                 taken_origins.append(i)
     if decorrelated:
         no_decor=no_decor+1
-    
+
 print('Number of decorrelated groups of paths is '+str(no_decor))
 
 # Generate a tree, redo this if you want nice EPS/PDF graphics
@@ -95,14 +100,14 @@ for i in range (1, no_runs):
         if df.DIR[compare_to] == 'BW':
             if shooting_point > df.MIN[compare_to] and shooting_point < df.SP[compare_to]:
                 break
-            
+
     # Create a line down from the shooting point
     oldcurrent_y = current_y
     current_y = current_y + pxrun
 
     w.create_line(shooting_point + truezero_x, oldcurrent_y - modifier, shooting_point + truezero_x, current_y + 1, fill="black", width=linewidth, dash=(4,4))
-    
-    
+
+
     # Write the line
     if df.DIR[i] == 'FW':
         w.create_line(shooting_point + truezero_x, current_y, df.MAX[i] + truezero_x, current_y, fill="green", width=linewidth)
@@ -125,7 +130,7 @@ mainloop()
 # DRAW A SINGLE LINE FIRST TO BOTH PNG AND EPS AND CHECK ZE OUTPUT
 
 # Start atshooting point,
-# go to min or max of original, go to the shooting point, go down, 
+# go to min or max of original, go to the shooting point, go down,
 # go to min or max
 # go back to shooting point
 
