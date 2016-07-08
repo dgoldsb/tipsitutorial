@@ -17,12 +17,12 @@
 
 \subsection*{Introduction}
 
-Consider a molecular system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) methods to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a timescale of milliseconds, for instance. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
+Consider a molecular system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) methods to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a tbeyond that timescale. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
 
 % Acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
 If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. If the shooting move is unsuccessful, it is rejected, and a new shooting move is performed. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
 
-In this tutorial the useage of the \textsc{TIPSI} package (version 0.1) is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns dipeptide alanine, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is actually a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
+In this tutorial the useage of the \textsc{TIPSI} (Transition Interface/Path Sampling Identifier) package version 0.1 is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns alanine dipeptide, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
 
 \textsc{TIPSI} relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. For this tutorial, \textsc{git} is required to pull the repository with the demonstration files. For visualizing structures, the VMD package is recommended. This tutorial is written assuming you work on a Linux system. We assume some knowledge in working with Linux, as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial for those less familiar with either. Finally, it is assumed you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
 % Stukje over hoe het opgezet is naast het protocol, welk field en alles.
@@ -157,7 +157,7 @@ The output will be put in the \texttt{\textcolor{blue}{output}} directory.
 
 \subsubsection*{Running TIPSI}
 
-Before all else, we should check if the right files are flagged as executable. The file \texttt{/documents/executables.txt} contains a list of all files in the \texttt{/bin/tipsi/}-directory that should be flagged as executable. Executable files should show green when using the \texttt{ls} command in this directory.
+Before all else, we should check if the right files are flagged as executable. The file \texttt{/documents/executables.txt} contains a list of all files in the \texttt{/bin/tipsi/}-directory that should be flagged as executable. Executable files should show green when using the \texttt{ls} command in this directory. Making files executable is done with \texttt{chmod +x file}.
 
 To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. To find if there are stables states between which a transition can take place, we need to express our trajectory in terms of some collective variable. In this example, we use two dihedrals, $\phi$ and $\psi$. We create a an index file defining these dihedrals by going to the output directory of the room temperature simulation, and run
 %
@@ -317,7 +317,7 @@ Normally it is necessary to run a regular MD simulation to confirm that the two 
 
 To tell \textsc{TIPSI} how to define the stable states, we have to set up a parameter (\texttt{.par}) file. The stable states are in this case define by whether certain hydrogen bonds exist. In Fig.~\ref{fig:dnabr}, we can see the hydrogen bonds formed in both pairings. We are dealing with an A-T basepair, so there should be two hydrogen bonds in either configuration. One hydrogen bond is always present, and is between atoms 275 and 492. The hydrogen bond unique in the Watson-Crick pairing is between atoms 276 and 495, and the bond unique to the Hoogsteen pairing is between 276 and 289.
 
-Go to the \textcolor{blue}{\texttt{./bin}} directory, and look at the \texttt{tps-dnabr.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state correctly. Notice that the numbers are not the same! This is because we define the atoms now in a Numpy array. This array is 0-indexed, whereas \textsc{gromacs} starts counting at 1. For more information on this, read the appendix on \textsc{tipsi} parameter files.
+Go to the \textcolor{blue}{\texttt{bin}} directory, and look at the \texttt{tps-dnabr.par} file. In this file, we define the maximum length of a transition path, as well as when the system is in state A, state B, or inbetween (I). Confirm that we confirmed the state correctly. Notice that the numbers are not the same! This is because we define the atoms now in a Numpy array. This array is 0-indexed, whereas \textsc{gromacs} starts counting at 1. For more information on this, read the appendix on \textsc{tipsi} parameter files.
 
 Now that we set up the parameter file, we need to edit our run script to take the correct input. Open the file \textcolor{green}{\texttt{run\_tipsi-dnabr}}, and check if the \texttt{.tpr} file (for the simulation setting) and the \texttt{.trr} file (for the trajectory) are set correctly. Run \textsc{TIPSI} by entering
 %
@@ -325,7 +325,7 @@ Now that we set up the parameter file, we need to edit our run script to take th
 qsub submit_tipsi
 \end{lstlisting}
 %
-in the \textcolor{blue}{\texttt{./dnabr-tipsi}} directory.
+in the \textcolor{blue}{\texttt{dnabr-tipsi}} directory.
 
 \subsubsection*{Analyzing Results from TIPSI}
 
@@ -392,7 +392,9 @@ In general, we run \textsc{tipsi} using the \texttt{run tipsi}-script included i
 Examining this script reveals that \textsc{tipsi} takes the following input parameters in the case of this tutorial:
 
 \begin{lstlisting}
-./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps.par -ndx index.ndx -maxc 10 -np 16 -gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" -mdrun "\$MDRUN"
+./tipsi/tipsi.sh -v -tpr md.tpr -trr 000003.trr -par tps.par 
+-ndx index.ndx -maxc 10 -np 16 -mdrun "\$MDRUN"
+-gmxrc "/share/apps/gromacs/openmpi-intel/gromacs-4.5.4/bin/GMXRC" 
 \end{lstlisting}
 
 The parameter \texttt{-v} enables verbose output, which is written to the \texttt{O}-file in the output directory. 
@@ -401,6 +403,7 @@ The MD-settings are then read from a tpr-file, entered under \texttt{-tpr}.
 The initial trajectory is loaded in with \texttt{-trr}. 
 The parameter file is loaded in with \texttt{-par}, and the groups that are used in the parameter file with \texttt{-ndx}. 
 The number of processors for MPI is set with \texttt{-np}. 
+The number of shooting moves performed is set with \texttt{-maxc}.
 Finally, the correct \textsc{gromacs} executables are linked to with \texttt{-gmxrx} and \texttt{-mdrun}.
 Additional parameters can be found by running \textsc{tipsi} with the \texttt{-h} command.
 
@@ -452,9 +455,9 @@ init pair = numpy.array((5, 7))
 par dist2 = pdist(frame[pair,:]) 
 \end{lstlisting}
 
-\subsection*{Calculator options}
+\textbf{IMPORTANT NOTE}: \textsc{tipsi} starts its index with 0, whereas \textsc{gromacs} starts with 1. To avoid off-by-one errors, make sure you subtract 1 off every atom number when you write them directly into the parameter file. The index files read into \textsc{tipsi} are 1-indexed, however, so \texttt{ndx} files do not have to be altered.
 
-\textbf{IMPORTANT NOTE}: \textsc{tipsi} starts its index with 0, whereas \textsc{gromacs} starts with 1. To avoid off-by-one errors, make sure you subtract 1 off every atom number. The index files read into \textsc{tipsi} are 1-indexed, however.
+\subsection*{Calculator options}
 
 Below, we show a list of the available functions to define parameters in the .par file. An atom or group of atoms is always defined within a frame. 
 Each frame is a $n \times 3$ array, containing the x/y/z-coordinates of all $n$ atoms in the trajectory. 
@@ -472,7 +475,7 @@ For more information, explore \texttt{functions.py} in the \textcolor{blue}{\tex
 		\textbf{Center of Mass}: mass of a set of atom numbers \texttt{coord} (numpy array or index group).
 \item 	\texttt{dist(a, b, box, what)}\\
 		\textbf{Distance}: the distance between atom numbers \texttt{a} and \texttt{b}. The mode \texttt{what} can be set to Euclidean or Manhattan.
-\item 	\texttt{angle(a, b, c}\\
+\item 	\texttt{angle(a, b, c)}\\
 		\textbf{Angle}: the angle between atom numbers \texttt{a}, \texttt{b} and \texttt{c}.
 \item 	\texttt{dihrad(a, b, c, d)}\\
 		\textbf{Dihedral (radians)}: the dihedral between atom numbers \texttt{a}, \texttt{b}, \texttt{c} and \texttt{d} in radians.
