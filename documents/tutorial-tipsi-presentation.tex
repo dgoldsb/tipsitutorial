@@ -18,10 +18,6 @@
 \titlepage
 \end{frame} 
 
-\begin{frame}
-\frametitle{Table of contents}
-\tableofcontents
-\end{frame} 
 
 %%% Introduction
 
@@ -52,6 +48,11 @@ In this presentation I will:
 \item Discuss the additional documentation
 \end{itemize} 
 \end{frame}
+
+\begin{frame}
+\frametitle{Table of contents}
+\tableofcontents
+\end{frame} 
 
 \begin{frame}
 \frametitle{What is TPS?}
@@ -160,7 +161,7 @@ Our first example is \textbf{alanine dipeptide}:
 In this example we do everything from scratch:
 \begin{itemize}
 \item Start with \texttt{pdb}-file (defines the structure) and MD settings
-\item We prepare make a periodic system with a solvent
+\item We prepare a periodic system, add a solvent
 \item We do energy minimization followed by a constrained MD run
 \item We do runs at room temperature and high temperature
 \end{itemize}
@@ -259,7 +260,7 @@ B       525.0   True    ../../6/4/6-4-FW.trr
 \frametitle{Assembling paths}
 \textbf{The solution}: 
 \begin{itemize}
-\item Bashscripts that searches for directories with \texttt{ACCEPTED}-file
+\item Bashscript that searches for directories with \texttt{ACCEPTED}-file
 \item Scans \texttt{dat}-file using regular expressions
 \item Overwrites timestamps
 \item Creates each path by dumping and appending single frames
@@ -337,7 +338,6 @@ In this example we start with a trajectory and state definitions:
 \item We set up a parameter file that include the state definitions (H-bonds)
 \item We run \textsc{tipsi} with this \texttt{tpr} and the provided trajectory
 \end{itemize}
-We look at the order parameters in the run using a Python script and \textsc{Gromacs} commands.
 \end{frame}
 
 %% Describe the analysis steps
@@ -422,7 +422,7 @@ Calculator options are:
 \begin{frame}
 \frametitle{Summary} 
 \begin{itemize}
-\item I wrote a tutorial for students/people interested in \textsc{tipsi} with a fast and uninteresting example, and a more computationally demanding but actually interesting example
+\item I wrote a tutorial for students/people interested in \textsc{tipsi} with a fast but not so rare example, and a more computationally demanding but actually interesting example
 \item Added a bash script that finishes the output to make it fit for further analysis
 \item Added a basic script that helps understand the shooting moves made
 \item Compiled all calculator options, and how to set up a parameter file for \textsc{tipsi}
