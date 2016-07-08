@@ -34,7 +34,7 @@ counter = 0
 for direction in FWs:
     if direction=='FW':
         counter=counter+1
-print('FW/BW ratio is '+str(counter/len(FWs)))
+print('FW/BW ratio in the accepted paths is '+str(counter/len(FWs)))
 
 # Number of decorrelated paths
 no_runs=len(lengths)
