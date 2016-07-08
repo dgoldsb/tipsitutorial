@@ -329,7 +329,7 @@ in the \textcolor{blue}{\texttt{dnabr-tipsi}} directory.
 
 \subsubsection*{Analyzing Results from TIPSI}
 
-As in the previous example, you should compare your result to the transition in the \textcolor{blue}{\texttt{exampleresults}} folder to verify that you captured the transition. The basepair of interest can be isolated in \textsc{VMD} by visualizing only \texttt{resname DT and resID 9}, and \texttt{resname DA and resID 4}. You can process the information in the TPS process again by running
+As in the previous example, you should compare your result to the transition in the \textcolor{blue}{\texttt{exampleresults}} folder to verify that you captured the transition. The basepair of interest can be isolated in \textsc{VMD} by visualizing only \texttt{resname DT and resid 9}, and \texttt{resname DA and resid 4}. If you use the RMSD trajectory tool in VMD, make sure to change 'protein' to 'nucleic' before hitting 'ALIGN'. You can process the information in the TPS process again by running
 %
 \begin{lstlisting}
 python ../../../bin/processTIPSImerge.py metainfo.csv
