@@ -7,6 +7,43 @@
 \usepackage{titlesec}
 \titleformat*{\section}{\Large\bfseries\sffamily}
 \titleformat*{\subsection}{\large\bfseries\sffamily}
+\usepackage{filecontents}
+
+\begin{filecontents}{references.bib}
+@misc{dnabr,
+title = {DNA baserolling: A Friday afternoon project},
+author = {Jocelyne Vreede and David W. H. Swenson},
+year = {2013}
+}
+@misc{tipsi,
+title = {Transition Interface/Path Sampling Identifier},
+author = {Tsjerk A. Wassenaar},
+institution = {University of Amsterdam},
+year = {2014}
+}
+@misc{gromacs,
+title = {GROMACS User Manual version 4.5.4},
+author = {M.J. Abraham and D. van der Spoel and E. Lindahl and B. Hess},
+year = {2010}
+}
+@article{nikolova2011transient,
+  title={Transient Hoogsteen base pairs in canonical duplex DNA},
+  author={Nikolova, Evgenia N and Kim, Eunae and Wise, Abigail A and O’Brien, Patrick J and Andricioaei, Ioan and Al-Hashimi, Hashim M},
+  journal={Nature},
+  volume={470},
+  number={7335},
+  pages={498--502},
+  year={2011},
+  publisher={Nature Publishing Group}
+}
+@MISC{alaninerep,
+    author = {{CP2K: Open Source Molecular Dynamics}},
+    title = {Ramachandran plot for Alanine Dipeptide},
+    year = {2014},
+    note = {[Online; accessed July 8, 2016]},
+    url = {https://www.cp2k.org/exercises:2014_ethz_mmm:alanine_dipeptide}
+}
+\end{filecontents}
 
 \setlength\parindent{15pt}
 \lstset{basicstyle=\ttfamily, escapeinside={\%*}{*)}}
@@ -22,7 +59,7 @@ Consider a molecular system that can be in two stable states, which we label as 
 % Acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
 If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. If the shooting move is unsuccessful, it is rejected, and a new shooting move is performed. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
 
-In this tutorial the useage of the \textsc{TIPSI} (Transition Interface/Path Sampling Identifier) package version 0.1 is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns alanine dipeptide, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
+In this tutorial the useage of the \textsc{TIPSI} (Transition Interface/Path Sampling Identifier) package version 0.1 is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine \cite{gromacs, tipsi}. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns alanine dipeptide, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
 
 \textsc{TIPSI} relies on \textsc{GROMACS} version 4.5.4 to do molecular simulation. For this tutorial, \textsc{git} is required to pull the repository with the demonstration files. For visualizing structures, the VMD package is recommended. This tutorial is written assuming you work on a Linux system. We assume some knowledge in working with Linux, as well as a basic understanding of how to work with \textsc{GROMACS}. There will be a cheatsheet in the appendix of this tutorial for those less familiar with either. Finally, it is assumed you are working on Carbon, the clustercomputer of the Computational Chemistry group at the Universiteit van Amsterdam.
 % Stukje over hoe het opgezet is naast het protocol, welk field en alles.
@@ -33,7 +70,7 @@ Both use the \texttt{TIP3P} water model. The forcefield used in the first tutori
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{images/alanine.png}
-    \caption{Alanine dipeptide, dihedrals labeled $\phi$ and $\psi$.}
+    \caption{Alanine dipeptide, dihedrals labeled $\phi$ and $\psi$, from \cite{alaninerep}.}
     \label{fig:alanine}
 \end{figure}
 
@@ -271,11 +308,11 @@ This has to be done on your own machine, however, as an image is outputted to th
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.25]{images/pairing.png}
-    \caption{Alanine dipeptide, dihedrals labeled $\phi$ and $\psi$.}
+    \caption{Hoogsteen and Watson-Crick pairing, from \cite{nikolova2011transient}.}
     \label{fig:dnabr}
 \end{figure}
 
-For the second example, we examine the case of the 'DNA baseroll'. This is an actual rare event, in which a DNA basepair transition from the Watson-Crick configuration to the Hoogsteen pairing, or vice versa. These two configurations are illustrated in Fig.~\ref{fig:dnabr}. This event typically does not occur when running a normal MD simulation for a microsecond, but using \textsc{tipsi} we will generate several new transitions.
+For the second example, we examine the case of the 'DNA baseroll', based on a project by Jocelyne Vreede and David Swenson (the original presentation is included in the \texttt{\textcolor{blue}{documents}} directory) \cite{dnabr}. This is an actual rare event, in which a DNA basepair transition from the Watson-Crick configuration to the Hoogsteen pairing, or vice versa. These two configurations are illustrated in Fig.~\ref{fig:dnabr}. This event typically does not occur when running a normal MD simulation for a microsecond, but using \textsc{tipsi} we will generate several new transitions.
 
 \subsubsection*{Preparation}
 
@@ -336,6 +373,11 @@ python ../../../bin/processTIPSImerge.py metainfo.csv
 \end{lstlisting}
 % 
 on your PC. Is the ratio between backward and forward shooting moves about 0.5? And is the tree similarly shaped as the tree from example 1?
+
+\subsubsection*{References}
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 \newpage
 
