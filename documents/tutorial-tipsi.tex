@@ -50,14 +50,36 @@ year = {2010}
 
 \begin{document}
 
-\section*{Transition Path Sampling}
+\section*{Transition Path Sampling Tutorial}
 
 \subsection*{Introduction}
 
 Consider a molecular system that can be in two stable states, which we label as state $A$ and state $B$. An example is a protein complex, which can be in a folded or an unfolded state. To observe the way in which the system transitions from state $A$ to state $B$, we can apply Molecular Dynamics (MD) methods to simulate the system for an amount of time. Traditional MD methods can have trouble capturing a transition, however, if this transition is a \textbf{rare event}. MD simulations can be done up to an order of microseconds, which is not sufficient to capture transitions that happen at a tbeyond that timescale. This problem can be solved by performing a metadynamics simulation. For this method, we introduce a bias potential that drives the system from state $A$ to state $B$. In some cases, we can also force a transition by increasing the temperature of a traditional MD simulation, which can help proteins unfold, for example. Both these methods will provide a transition path, but not one under normal conditions. 
 
 % Acceptatieregel in math of woorden, netjes om te noemen, niet de afleiding
-If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. TPS selects a point in this trajectory, called the 'shooting point'. From this point, then a 'shooting move' is made. In a shooting move, a new MD simulation is started, with the shooting point as a starting state. A shooting move can be backward in time or forward in time. If the simulation reaches the state ($A$ or $B$) that was reached at the corresponding end of the original parent trajectory (the front for a backward shooting move, the end for a forward shooting move), the shooting move is labelled as successful. If the shooting move is unsuccessful, it is rejected, and a new shooting move is performed. The idea is that the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory.
+If we are interested in observing the transition under normal conditions, we can apply \textbf{transition path sampling} (TPS), a rare event sampling method. TPS methods require a single transition path as an input, and can produce many new, independent ones. The input trajectory can be produced using a high temperature MD simulation, or a metadynamics simulation. 
+
+%Monte carlo sampling of path space
+TPS is a Monte Carlo sampling method of the path space, meaning that it samples MD trajectories that connect the states $A$ and $B$ in an unbiased fashion. These two states are assumed to be stable, or at least semi-stable, so that the system is unlikely to exit the state once it enters it.
+%oneway/two way shooting
+TPS selects a point in this trajectory, called the 'shooting point'. From this point a 'shooting move' is made. In a shooting move, a new MD simulation is started with the shooting point as a starting state. A shooting move can be backward in time or forward in time in the case of one-way shooting, or both in the case of two way shooting. This shooting move replaces the original trajectory in the case of two-way shooting, and the part before or after the shooting point in the case of one-way shooting (depending on the direction of the shooting move). A shooting move can be accepted or rejected. If the new trajectory does not connect the two states $A$ and $B$, the new shooting move is instantly rejected. If the two states are connected, the Metropolis acceptance rule
+%
+\begin{equation}
+P_{acc}=\min(1, \frac{N^{(o)}}{N^{(n)}})
+\end{equation}
+%
+where $P_{acc}$ denotes the probability of accepting the new path, $N^{(o)}$ is the length of the original path, and $N^{(n)}$ is the length of the new path. To avoid accepting paths that are too long, a second stage is introduced in the acceptance process: a maximum pathlength $N_{\mathrm{max}}$ is defined before the shooting procedure starts, and defined as
+%
+\begin{equation}
+N_{\mathrm{max}} = \frac{N^{(o)}}{\xi}
+\end{equation}
+%
+where $\xi$ is a uniformly distributed random number between 0 and 1. New paths longer than the maximum length are rejected by default. If the shooting move is rejected, a new move is performed.
+
+%description of stable states and transition region is done by order parameters
+The two stable states $A$ and $B$, as well as the transition region $I$, are defined using order parameters. These order parameters are properties of the molecular system that can be expressed numerically for every timestep. For instance, it is possible to define the stable states using the distance between two specific atom (to test whether a hydrogen bond exists), by examining the radius of gyration to examine the compactness of the molecule, or by tracking a dihedral angle. 
+
+The idea is that (hopefully) the shooting point is chosen in such a way that the 'committor probability' is 0.5: if you start an MD simulation at this frame, there is a 50\% chance to reach both state $A$ and state $B$. A new shooting point is then picked from the trajectory of the shooting move, and the process is repeated. Generally the shooting point is chosen at random, although methods are available to steer the shooting point towards a point where the committor probability is a half. After several shooting moves, new paths can be constructed that go from $A$ to $B$, and are decorrelated from the original trajectory. A TPS algorithm that performs a forward and backward shooting move every step is labeled as a two-way shooting algorithm, whereas those that do a forward or backward shooting are labelled one-way shooting algorithms. \textsc{Tipsi} belongs to the latter category, and only does one move per step, randomly picking forward or backward at each attempt. The one-way shooting procedure is used in \textsc{tipsi} as it improves the acceptance ratio of the shooting moves.
 
 In this tutorial the useage of the \textsc{TIPSI} (Transition Interface/Path Sampling Identifier) package version 0.1 is demonstrated, a script that performs TPS using the \textsc{gromacs} MD engine \cite{gromacs, tipsi}. \textsc{TIPSI} is an application of rare event sampling, designed to sample many possible transition paths in a molecular system with two stable states, $A$ and $B$, where transitions between the two states are extremely rare. In this tutorial, two examples will be discussed. First, we will provide a tutorial designed to have short computational times. This tutorial concerns alanine dipeptide, and samples a transition between its two conformations. These two states are easily visually distinguishable, but the transition is not actually a rare event. The second example concerns a transition which is a rare event: the flipping of DNA basepairs from the standard Watson-Crick pairing to the non-standard Hoogsteen pairing. This transition typically does not occur even if the system is simulated for microseconds. This example uses a provided result of a metadynamics simulation as input. 
 
