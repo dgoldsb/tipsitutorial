@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
 
+import sys
+
+try:
+   from tkinter import *
+except:
+   from Tkinter import *
 import pandas as pd
-from tkinter import *
 import turtle
 import csv
-import sys
 import numpy as np
 
 # Goals:
@@ -16,7 +20,7 @@ import numpy as np
 
 # Open the CSV
 df = pd.read_csv(sys.argv[1], sep=',', header=0)
-print(df.columns.values)
+print((df.columns.values))
 
 # Average path
 df.Length = df.MAX - df.MIN
@@ -26,7 +30,7 @@ total_length = 0
 strings=df.COMP.tolist()
 for string in strings:
     total_length = total_length + len(string)/3
-print('Average length is '+str(total_length/len(lengths))+' frames')
+print(('Average length is '+str(total_length/len(lengths))+' frames'))
 
 # Count FW over length
 FWs = df.DIR.tolist()
@@ -34,7 +38,7 @@ counter = 0
 for direction in FWs:
     if direction=='FW':
         counter=counter+1
-print('FW/BW ratio in the accepted paths is '+str(counter/len(FWs)))
+print(('FW/BW ratio in the accepted paths is '+str(counter/len(FWs))))
 
 # Number of decorrelated paths
 no_runs=len(lengths)
@@ -53,7 +57,7 @@ for string in strings:
     if decorrelated:
         no_decor=no_decor+1
 
-print('Number of decorrelated groups of paths is '+str(no_decor))
+print(('Number of decorrelated groups of paths is '+str(no_decor)))
 
 # Generate a tree, redo this if you want nice EPS/PDF graphics
 master = Tk()

@@ -57,7 +57,7 @@ for line in inp.readlines():
             # convert to integer and append to the last
             # element of the list
             data1[-1].append(float(i))
-var1 = np.asarray(zip(*data1))
+var1 = np.asarray(list(zip(*data1)))
 print(var1.shape)
 var1 = var1[row1,:]
 
@@ -80,7 +80,7 @@ for line in inp.readlines():
             # convert to integer and append to the last
             # element of the list
             data2[-1].append(float(i))
-var2 = np.asarray(zip(*data2))
+var2 = np.asarray(list(zip(*data2)))
 var2 = var2[row2,:]
 
 """
